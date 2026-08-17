@@ -16,7 +16,7 @@ export const Header: React.FC<HeaderProps> = ({ showAdminLink = true }) => {
         {/* Brand Logo & Título Oficial */}
         <div className="flex items-center gap-3 sm:gap-4">
           <Link href="/" className="flex items-center group focus:outline-none shrink-0">
-            <PremierLogo className="h-11 sm:h-12 w-auto group-hover:opacity-95 transition-opacity" />
+            <PremierLogo className="h-8 sm:h-9 w-auto group-hover:opacity-95 transition-opacity" />
           </Link>
 
           <div className="h-8 w-px bg-white/20 hidden sm:block" />
