@@ -11,15 +11,15 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ showAdminLink = true }) => {
   return (
-    <header className="w-full bg-[#180B38] text-white border-b border-[#281458]">
-      <div className="max-w-4xl mx-auto px-4 py-3.5 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+    <header className="w-full bg-[#24134a] text-white border-b border-[#351e68]">
+      <div className="max-w-4xl mx-auto px-4 py-3 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
         {/* Brand Logo & Título Oficial */}
         <div className="flex items-center gap-3 sm:gap-4">
           <Link href="/" className="flex items-center group focus:outline-none shrink-0">
-            <PremierLogo className="h-10 sm:h-11 w-auto group-hover:opacity-95 transition-opacity" />
+            <PremierLogo className="h-11 sm:h-12 w-auto group-hover:opacity-95 transition-opacity" />
           </Link>
 
-          <div className="h-7 w-px bg-white/20 hidden sm:block" />
+          <div className="h-8 w-px bg-white/20 hidden sm:block" />
 
           <h1 className="text-xs sm:text-sm font-semibold text-slate-200 tracking-wide text-center sm:text-left">
             Autodeclaração de Diversidade
