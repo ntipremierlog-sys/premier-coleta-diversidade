@@ -15,11 +15,11 @@ export const Header: React.FC<HeaderProps> = ({ showAdminLink = true }) => {
       <div className="max-w-4xl mx-auto px-4 py-3 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
         {/* Brand Logo & Título Oficial */}
         <div className="flex items-center gap-3 sm:gap-4">
-          <Link href="/" className="flex items-center group focus:outline-none shrink-0">
-            <PremierLogo className="h-8 sm:h-9 w-auto group-hover:opacity-95 transition-opacity" />
+          <Link href="/" className="flex items-center group focus:outline-none shrink-0 py-1">
+            <PremierLogo className="h-14 sm:h-16 w-auto group-hover:opacity-95 transition-opacity" />
           </Link>
 
-          <div className="h-8 w-px bg-white/20 hidden sm:block" />
+          <div className="h-10 w-px bg-white/20 hidden sm:block" />
 
           <h1 className="text-xs sm:text-sm font-semibold text-slate-200 tracking-wide text-center sm:text-left">
             Autodeclaração de Diversidade

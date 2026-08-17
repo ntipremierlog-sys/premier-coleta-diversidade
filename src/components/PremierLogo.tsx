@@ -2,99 +2,98 @@ import React from "react";
 
 interface PremierLogoProps {
   className?: string;
-  variant?: "full" | "horizontal" | "vertical";
 }
 
 export const PremierLogo: React.FC<PremierLogoProps> = ({
-  className = "h-10 sm:h-11 w-auto",
+  className = "h-14 sm:h-16 w-auto",
 }) => {
   return (
-    <div className={`flex items-center select-none ${className}`}>
+    <div className={`flex items-center justify-center select-none ${className}`}>
       <svg
-        viewBox="0 0 380 64"
-        className="h-full w-auto block overflow-visible"
+        viewBox="0 0 320 155"
+        className="h-full w-auto block"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
-          {/* Gradiente Dourado Metálico Premier */}
-          <linearGradient id="premGold" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#FFF2D6" />
-            <stop offset="35%" stopColor="#E5CDA7" />
-            <stop offset="70%" stopColor="#C8A676" />
-            <stop offset="100%" stopColor="#9E7B4A" />
+          {/* Gradiente Dourado Metálico Original Premier */}
+          <linearGradient id="origGold" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#FBF4E6" />
+            <stop offset="35%" stopColor="#E2CEB0" />
+            <stop offset="70%" stopColor="#C4A87F" />
+            <stop offset="100%" stopColor="#9C7F56" />
           </linearGradient>
 
-          <linearGradient id="premGoldCenter" x1="0%" y1="0%" x2="0%" y2="100%">
+          <linearGradient id="origGoldCenter" x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor="#FFFFFF" />
-            <stop offset="40%" stopColor="#F5E3C8" />
-            <stop offset="100%" stopColor="#C9A676" />
+            <stop offset="45%" stopColor="#EAD8BE" />
+            <stop offset="100%" stopColor="#C5A880" />
           </linearGradient>
 
-          {/* Máscara das ranhuras horizontais do símbolo */}
-          <mask id="globeStripes">
-            <rect width="130" height="64" fill="white" />
-            <rect y="8" width="130" height="2" fill="black" />
-            <rect y="13" width="130" height="2.2" fill="black" />
-            <rect y="18" width="130" height="2.5" fill="black" />
-            <rect y="23" width="130" height="2.5" fill="black" />
-            <rect y="28" width="130" height="2.5" fill="black" />
-            <rect y="33" width="130" height="2.5" fill="black" />
-            <rect y="38" width="130" height="2.5" fill="black" />
-            <rect y="43" width="130" height="2.5" fill="black" />
-            <rect y="48" width="130" height="2.2" fill="black" />
-            <rect y="53" width="130" height="2" fill="black" />
+          {/* Máscara de Ranhuras Horizontais dos Globos */}
+          <mask id="origStripes">
+            <rect width="320" height="75" fill="white" />
+            <rect y="12" width="320" height="2.2" fill="black" />
+            <rect y="18" width="320" height="2.6" fill="black" />
+            <rect y="24" width="320" height="2.8" fill="black" />
+            <rect y="30" width="320" height="2.8" fill="black" />
+            <rect y="36" width="320" height="2.8" fill="black" />
+            <rect y="42" width="320" height="2.8" fill="black" />
+            <rect y="48" width="320" height="2.8" fill="black" />
+            <rect y="54" width="320" height="2.6" fill="black" />
+            <rect y="60" width="320" height="2.2" fill="black" />
           </mask>
         </defs>
 
-        {/* 1. SÍMBOLO: 5 Globos Sobrepostos (Esquerda) */}
-        <g mask="url(#globeStripes)" transform="translate(0, 0)">
-          {/* Globo 1 (Extrema esquerda) */}
-          <ellipse cx="24" cy="31" rx="18" ry="18" fill="url(#premGold)" opacity="0.65" />
-          {/* Globo 2 */}
-          <ellipse cx="44" cy="31" rx="20" ry="20" fill="url(#premGold)" opacity="0.85" />
-          {/* Globo 4 */}
-          <ellipse cx="84" cy="31" rx="20" ry="20" fill="url(#premGold)" opacity="0.85" />
-          {/* Globo 5 (Extrema direita) */}
-          <ellipse cx="104" cy="31" rx="18" ry="18" fill="url(#premGold)" opacity="0.65" />
-          {/* Globo 3 (Central em destaque) */}
-          <ellipse cx="64" cy="31" rx="22" ry="22" fill="url(#premGoldCenter)" opacity="1.0" />
+        {/* 1. SÍMBOLO NO TOPO: 5 Globos Sobrepostos (Disposição Original) */}
+        <g mask="url(#origStripes)">
+          {/* Globo 1 (Extrema Esquerda) */}
+          <ellipse cx="85" cy="36" rx="22" ry="22" fill="url(#origGold)" opacity="0.65" />
+          {/* Globo 2 (Centro-Esquerda) */}
+          <ellipse cx="120" cy="36" rx="25" ry="25" fill="url(#origGold)" opacity="0.85" />
+          {/* Globo 4 (Centro-Direita) */}
+          <ellipse cx="200" cy="36" rx="25" ry="25" fill="url(#origGold)" opacity="0.85" />
+          {/* Globo 5 (Extrema Direita) */}
+          <ellipse cx="235" cy="36" rx="22" ry="22" fill="url(#origGold)" opacity="0.65" />
+          {/* Globo 3 (Central em Destaque) */}
+          <ellipse cx="160" cy="36" rx="28" ry="28" fill="url(#origGoldCenter)" opacity="1.0" />
         </g>
 
-        {/* 2. TEXTO: PREMIER (Grande, Nítido e com Serifas Oficiais) */}
+        {/* 2. TEXTO CENTRAL: PREMIER (Fonte Serifada Original, Caixa Alta, Branco) */}
         <text
-          x="135"
-          y="36"
+          x="160"
+          y="102"
+          textAnchor="middle"
           fill="#FFFFFF"
           fontFamily="Georgia, 'Times New Roman', 'Playfair Display', serif"
-          fontSize="35"
+          fontSize="44"
           fontWeight="bold"
-          letterSpacing="2.5"
+          letterSpacing="3.5"
         >
           PREMIER
         </text>
 
-        {/* 3. LINHA SEPARADORA DOURADA */}
+        {/* 3. LINHA SEPARADORA DOURADA HORIZONTAL */}
         <line
-          x1="135"
-          y1="43"
-          x2="370"
-          y2="43"
-          stroke="url(#premGold)"
-          strokeWidth="1.8"
+          x1="45"
+          y1="114"
+          x2="275"
+          y2="114"
+          stroke="url(#origGold)"
+          strokeWidth="2.2"
           strokeLinecap="round"
         />
 
-        {/* 4. TEXTO: LOGISTICS (Espaçado e Perfeitamente Legível) */}
+        {/* 4. TEXTO INFERIOR: L O G I S T I C S (Espaçamento Amplo Original) */}
         <text
-          x="252"
-          y="56"
+          x="160"
+          y="136"
           textAnchor="middle"
-          fill="#E5CDA7"
-          fontFamily="'Inter', 'Segoe UI', Arial, sans-serif"
-          fontSize="10"
-          fontWeight="600"
-          letterSpacing="9"
+          fill="#FFFFFF"
+          fontFamily="'Inter', 'Montserrat', 'Segoe UI', Arial, sans-serif"
+          fontSize="13"
+          fontWeight="500"
+          letterSpacing="13"
         >
           LOGISTICS
         </text>
