@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model DiversityRespondent {
+  id           String   @id @default(cuid())
+  nomeCompleto String
+  cpf          String?  // CPF informado (formatado ou numérico)
+  cpfHash      String   @unique // Hash HMAC-SHA256 para checagem de unicidade/busca
+  cpfMascarado String // Ex: "123.***.***-45"
+  unidade      String
+  matricula    String? // Opcional para integração TOTVS RM
+  createdAt    DateTime @default(now())
+
+  consents   DiversityConsent[]
+  submission DiversitySubmission?
+
+  @@index([unidade])
+}
+
+model DiversityConsent {
+  id           String              @id @default(cuid())
+  respondentId String
+  respondent   DiversityRespondent @relation(fields: [respondentId], references: [id], onDelete: Cascade)
+  categoria    String // "raca_cor" | "pcd" | "neurodivergencia" | "lgbtqiapn" | "genero" | "faixa_etaria"
+  aceito       Boolean
+  textoExibido String // Snapshot do termo de consentimento exibido na data para auditoria jurídica
+  dataResposta DateTime            @default(now())
+
+  @@index([respondentId])
+}
+
+model DiversitySubmission {
+  id              String   @id @default(cuid())
+  respondentId    String?  @unique
+  respondent      DiversityRespondent? @relation(fields: [respondentId], references: [id], onDelete: SetNull)
+  unidade         String
+  competencia     String // formato "YYYY-MM" (ex: "2026-08")
+  genero          String // "feminino" | "masculino" | "outro" | "nao_informado"
+  racaCor         String // "branca" | "preta" | "parda" | "amarela" | "indigena" | "nao_informado"
+  pcd             String // "sim" | "nao" | "nao_informado"
+  pcdTipo         String? // opcional, texto livre caso pcd == "sim"
+  neurodivergente String // "sim" | "nao" | "nao_informado"
+  faixaEtaria     String // "ate_29" | "30_44" | "45_59" | "60_mais" | "nao_informado"
+  lgbtqiapn       String // "sim" | "nao" | "nao_informado"
+  outroGrupo      String? // opcional, texto livre max 120 caracteres
+  createdAt       DateTime @default(now())
+
+  @@index([unidade, competencia])
+  @@index([competencia])
+}
+
+model DiversityAccessLog {
+  id           String   @id @default(cuid())
+  userId       String // Identificador do usuário/role admin que realizou a ação
+  acao         String // "export_xlsx" | "export_nominal" | "view_individual" | "delete_request" | "update_request" | "revoke_consent" | "retention_cleanup"
+  respondentId String? // Se aplicável (acesso/modificação a registro individual)
+  detalhe      String? // Metadados adicionais da ação (ex: filtros utilizados, campos alterados)
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@index([acao])
+  @@index([createdAt])
+}
