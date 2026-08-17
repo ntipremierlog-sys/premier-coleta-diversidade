@@ -65,118 +65,115 @@ export async function POST(request: NextRequest) {
     const consentTextSnapshot =
       "Estas informações serão utilizadas para atualização da base cadastral da Premier Logistics e construção de indicadores internos de diversidade e inclusão, nos termos da LGPD (Lei nº 13.709/2018). A recusa não gera nenhum efeito negativo sobre a relação de trabalho.";
 
-    // Transação atômica para gravação isolada
-    const result = await prisma.$transaction(async (tx) => {
-      // 1. Criar ou Atualizar Respondente (DiversityRespondent)
-      let respondent = await tx.diversityRespondent.findUnique({
-        where: { cpfHash: calculatedCpfHash },
-      });
-
-      if (respondent) {
-        respondent = await tx.diversityRespondent.update({
-          where: { id: respondent.id },
-          data: {
-            nomeCompleto: data.nomeCompleto.trim(),
-            cpf: data.cpf.trim(),
-            cpfMascarado: maskedCpf,
-            unidade: data.unidade,
-            matricula: data.matricula?.trim() || null,
-          },
-        });
-      } else {
-        respondent = await tx.diversityRespondent.create({
-          data: {
-            nomeCompleto: data.nomeCompleto.trim(),
-            cpf: data.cpf.trim(),
-            cpfHash: calculatedCpfHash,
-            cpfMascarado: maskedCpf,
-            unidade: data.unidade,
-            matricula: data.matricula?.trim() || null,
-          },
-        });
-      }
-
-      // 2. Registrar Consentimentos Granulares
-      const consentCategories = [
-        { key: "raca_cor", aceito: data.consentimentos.raca_cor },
-        { key: "pcd", aceito: data.consentimentos.pcd },
-        { key: "neurodivergencia", aceito: data.consentimentos.neurodivergencia },
-        { key: "lgbtqiapn", aceito: data.consentimentos.lgbtqiapn },
-        { key: "genero", aceito: data.consentimentos.geral },
-        { key: "faixa_etaria", aceito: data.consentimentos.geral },
-      ];
-
-      for (const cat of consentCategories) {
-        await tx.diversityConsent.create({
-          data: {
-            respondentId: respondent.id,
-            categoria: cat.key,
-            aceito: cat.aceito,
-            textoExibido: consentTextSnapshot,
-          },
-        });
-      }
-
-      // 3. Salvar ou Atualizar Submissão vinculada ao Respondent
-      const submissionData = {
-        unidade: data.unidade,
-        competencia: data.competencia,
-        genero: data.consentimentos.geral ? data.genero : "nao_informado",
-        racaCor: data.consentimentos.raca_cor ? data.racaCor : "nao_informado",
-        pcd: data.consentimentos.pcd ? data.pcd : "nao_informado",
-        pcdTipo:
-          data.consentimentos.pcd && data.pcd === "sim" && data.pcdTipo
-            ? data.pcdTipo.trim()
-            : null,
-        neurodivergente: data.consentimentos.neurodivergencia
-          ? data.neurodivergente
-          : "nao_informado",
-        faixaEtaria: data.consentimentos.geral
-          ? data.faixaEtaria
-          : "nao_informado",
-        lgbtqiapn: data.consentimentos.lgbtqiapn
-          ? data.lgbtqiapn
-          : "nao_informado",
-        outroGrupo: data.outroGrupo ? data.outroGrupo.trim() : null,
-      };
-
-      const existingSubmission = await tx.diversitySubmission.findUnique({
-        where: { respondentId: respondent.id },
-      });
-
-      let submission;
-      if (existingSubmission) {
-        submission = await tx.diversitySubmission.update({
-          where: { id: existingSubmission.id },
-          data: submissionData,
-        });
-      } else {
-        submission = await tx.diversitySubmission.create({
-          data: {
-            respondentId: respondent.id,
-            ...submissionData,
-          },
-        });
-      }
-
-      return { respondent, submission };
+    // 1. Criar ou Atualizar Respondente (DiversityRespondent)
+    let respondent = await prisma.diversityRespondent.findUnique({
+      where: { cpfHash: calculatedCpfHash },
     });
+
+    if (respondent) {
+      respondent = await prisma.diversityRespondent.update({
+        where: { id: respondent.id },
+        data: {
+          nomeCompleto: data.nomeCompleto.trim(),
+          cpf: data.cpf.trim(),
+          cpfMascarado: maskedCpf,
+          unidade: data.unidade,
+          matricula: data.matricula?.trim() || null,
+        },
+      });
+    } else {
+      respondent = await prisma.diversityRespondent.create({
+        data: {
+          nomeCompleto: data.nomeCompleto.trim(),
+          cpf: data.cpf.trim(),
+          cpfHash: calculatedCpfHash,
+          cpfMascarado: maskedCpf,
+          unidade: data.unidade,
+          matricula: data.matricula?.trim() || null,
+        },
+      });
+    }
+
+    // 2. Registrar Consentimentos Granulares
+    const consentCategories = [
+      { key: "raca_cor", aceito: data.consentimentos.raca_cor },
+      { key: "pcd", aceito: data.consentimentos.pcd },
+      { key: "neurodivergencia", aceito: data.consentimentos.neurodivergencia },
+      { key: "lgbtqiapn", aceito: data.consentimentos.lgbtqiapn },
+      { key: "genero", aceito: data.consentimentos.geral },
+      { key: "faixa_etaria", aceito: data.consentimentos.geral },
+    ];
+
+    for (const cat of consentCategories) {
+      await prisma.diversityConsent.create({
+        data: {
+          respondentId: respondent.id,
+          categoria: cat.key,
+          aceito: cat.aceito,
+          textoExibido: consentTextSnapshot,
+        },
+      });
+    }
+
+    // 3. Salvar ou Atualizar Submissão vinculada ao Respondent
+    const submissionData = {
+      unidade: data.unidade,
+      competencia: data.competencia,
+      genero: data.consentimentos.geral ? data.genero : "nao_informado",
+      racaCor: data.consentimentos.raca_cor ? data.racaCor : "nao_informado",
+      pcd: data.consentimentos.pcd ? data.pcd : "nao_informado",
+      pcdTipo:
+        data.consentimentos.pcd && data.pcd === "sim" && data.pcdTipo
+          ? data.pcdTipo.trim()
+          : null,
+      neurodivergente: data.consentimentos.neurodivergencia
+        ? data.neurodivergente
+        : "nao_informado",
+      faixaEtaria: data.consentimentos.geral
+        ? data.faixaEtaria
+        : "nao_informado",
+      lgbtqiapn: data.consentimentos.lgbtqiapn
+        ? data.lgbtqiapn
+        : "nao_informado",
+      outroGrupo: data.outroGrupo ? data.outroGrupo.trim() : null,
+    };
+
+    const existingSubmission = await prisma.diversitySubmission.findUnique({
+      where: { respondentId: respondent.id },
+    });
+
+    let submission;
+    if (existingSubmission) {
+      submission = await prisma.diversitySubmission.update({
+        where: { id: existingSubmission.id },
+        data: submissionData,
+      });
+    } else {
+      submission = await prisma.diversitySubmission.create({
+        data: {
+          respondentId: respondent.id,
+          ...submissionData,
+        },
+      });
+    }
 
     return NextResponse.json(
       {
         success: true,
         message: "Autodeclaração registrada com sucesso em conformidade com a LGPD.",
-        id: result.submission.id,
+        id: submission.id,
       },
       { status: 201 }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error("Erro ao salvar submissão LGPD:", error);
     return NextResponse.json(
       {
         error: "Erro interno no servidor ao processar a autodeclaração.",
+        details: error?.message || String(error),
       },
       { status: 500 }
     );
   }
+}
 }
