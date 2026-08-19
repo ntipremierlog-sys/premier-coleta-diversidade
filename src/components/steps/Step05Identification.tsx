@@ -204,11 +204,6 @@ export const Step05Identification: React.FC<Step05IdentificationProps> = ({
                     <span className="text-xs font-semibold text-slate-800 block">
                       {item.title}
                     </span>
-                    {item.isMandatory && (
-                      <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 bg-amber-100 text-amber-800 border border-amber-300 rounded flex items-center gap-0.5">
-                        <Lock className="w-2.5 h-2.5" /> Obrigatório
-                      </span>
-                    )}
                   </div>
                   <span className="text-[11px] text-slate-400">
                     {item.desc}
