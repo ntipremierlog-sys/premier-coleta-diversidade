@@ -215,15 +215,19 @@ export const Step05Identification: React.FC<Step05IdentificationProps> = ({
                   </span>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div
+                  className="flex items-center gap-2"
+                  title={item.isMandatory ? "Item obrigatório" : undefined}
+                >
                   <span
-                    className={`text-xs font-semibold px-2.5 py-1 rounded-md border ${
+                    className={`text-xs font-semibold px-2.5 py-1 rounded-md border flex items-center gap-1.5 ${
                       isAccepted
                         ? "bg-slate-900 text-white border-slate-900"
                         : "bg-slate-100 text-slate-500 border-slate-200"
                     }`}
                   >
-                    {isAccepted ? "Autorizado" : "Recusado"}
+                    {item.isMandatory && <Lock className="w-3 h-3 text-amber-400 shrink-0" />}
+                    <span>{isAccepted ? "Autorizado" : "Recusado"}</span>
                   </span>
                 </div>
               </div>
@@ -250,7 +254,7 @@ export const Step05Identification: React.FC<Step05IdentificationProps> = ({
         </div>
         <div className="flex-1">
           <label className="cursor-pointer text-xs font-medium text-slate-700 leading-snug">
-            Li e compreendi a finalidade do tratamento e minhas opções de consentimento (LGPD).
+            Li e compreendi a finalidade do tratamento (LGPD) e aceito prosseguir com o preenchimento das informações.
           </label>
         </div>
       </div>
