@@ -82,8 +82,8 @@ export const Step0Consent: React.FC<Step0ConsentProps> = ({
           </div>
         </div>
 
-        {/* Botões de Ação do Termo */}
-        <div className="mt-4 pt-3 border-t border-slate-200/60 flex flex-wrap items-center justify-between gap-2.5">
+        {/* Botão de Ação do Termo */}
+        <div className="mt-4 pt-3 border-t border-slate-200/60 flex items-center justify-start">
           <button
             type="button"
             onClick={() => setIsModalOpen(true)}
@@ -96,15 +96,6 @@ export const Step0Consent: React.FC<Step0ConsentProps> = ({
             <FileText className="w-4 h-4" />
             <span>{termoConsentimento ? "Revisar Termo Lido" : "Abrir e Ler Termo de Esclarecimentos"}</span>
           </button>
-
-          <a
-            href="/TERMO_DE_ESCLARECIMENTOS.docx"
-            download
-            className="inline-flex items-center gap-1.5 text-xs text-slate-600 hover:text-slate-900 font-semibold px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span>Baixar (.docx)</span>
-          </a>
         </div>
       </div>
 

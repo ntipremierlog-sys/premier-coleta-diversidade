@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { TERMO_ESCLARECIMENTOS } from "@/lib/termo-esclarecimentos";
-import { FileText, Download, CheckCircle2, X, Eye, ShieldCheck, ArrowDown } from "lucide-react";
+import { FileText, CheckCircle2, X, ShieldCheck, ArrowDown } from "lucide-react";
 
 interface TermoEsclarecimentosModalProps {
   isOpen: boolean;
@@ -82,19 +82,9 @@ export const TermoEsclarecimentosModal: React.FC<TermoEsclarecimentosModalProps>
           onScroll={handleScroll}
           className="p-5 sm:p-6 overflow-y-auto flex-1 space-y-4 text-slate-700 text-sm leading-relaxed bg-slate-50/50"
         >
-          <div className="bg-amber-50/80 border border-amber-200 rounded-xl p-3.5 flex items-center justify-between gap-3 text-xs text-amber-900 font-medium">
-            <div className="flex items-center gap-2">
-              <FileText className="w-4 h-4 text-amber-700 shrink-0" />
-              <span>Documento oficial do projeto de coleta de dados.</span>
-            </div>
-            <a
-              href="/TERMO_DE_ESCLARECIMENTOS.docx"
-              download
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-semibold shadow-sm transition-colors text-[11px] shrink-0"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>Baixar (.docx)</span>
-            </a>
+          <div className="bg-amber-50/80 border border-amber-200 rounded-xl p-3.5 flex items-center gap-2 text-xs text-amber-900 font-medium">
+            <FileText className="w-4 h-4 text-amber-700 shrink-0" />
+            <span>Documento oficial do projeto de coleta de dados. Por favor, leia até o final para confirmar.</span>
           </div>
 
           <div className="space-y-3 bg-white p-4 sm:p-5 rounded-xl border border-slate-200 text-slate-800 text-xs sm:text-sm">
