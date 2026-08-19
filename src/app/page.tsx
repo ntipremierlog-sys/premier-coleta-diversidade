@@ -39,7 +39,7 @@ function FormContent() {
     // Unidade & Competência
     unidade: "",
     competencia: getCurrentCompetencia(),
-    termoConsentimento: true,
+    termoConsentimento: false,
 
     // Identificação
     nomeCompleto: "",
@@ -57,7 +57,7 @@ function FormContent() {
 
     // Respostas
     genero: "nao_informado",
-    racaCor: "nao_informado",
+    racaCor: "",
     pcd: "nao_informado",
     pcdTipo: "",
     neurodivergente: "nao_informado",
@@ -151,6 +151,10 @@ function FormContent() {
     setStepError(null);
 
     if (currentStep.key === "unidade") {
+      if (!formData.termoConsentimento) {
+        setStepError("Você precisa abrir, ler e aceitar o Termo de Esclarecimentos para prosseguir.");
+        return false;
+      }
       if (!formData.unidade) {
         setStepError("Por favor, selecione sua unidade/filial de atuação.");
         return false;
@@ -170,8 +174,8 @@ function FormContent() {
         return false;
       }
     } else if (currentStep.key === "racaCor") {
-      if (!formData.racaCor || formData.racaCor === "nao_informado") {
-        setStepError("Por favor, selecione uma opção de raça/cor.");
+      if (!formData.racaCor) {
+        setStepError("Por favor, selecione uma opção de raça/cor para continuar.");
         return false;
       }
     } else if (currentStep.key === "pcd") {
@@ -248,7 +252,7 @@ function FormContent() {
     setFormData({
       unidade: "",
       competencia: getCurrentCompetencia(),
-      termoConsentimento: true,
+      termoConsentimento: false,
       nomeCompleto: "",
       cpf: "",
       matricula: "",
@@ -260,7 +264,7 @@ function FormContent() {
         geral: true,
       },
       genero: "nao_informado",
-      racaCor: "nao_informado",
+      racaCor: "",
       pcd: "nao_informado",
       pcdTipo: "",
       neurodivergente: "nao_informado",

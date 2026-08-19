@@ -7,6 +7,7 @@ import {
   AlertCircle,
   CheckSquare,
   Square,
+  Lock,
 } from "lucide-react";
 
 export interface ConsentimentosState {
@@ -48,6 +49,9 @@ export const Step05Identification: React.FC<Step05IdentificationProps> = ({
   };
 
   const toggleConsent = (key: keyof ConsentimentosState) => {
+    // Raça/Cor é obrigatório por política do formulário
+    if (key === "raca_cor") return;
+
     onUpdate({
       consentimentos: {
         ...consentimentos,
@@ -58,7 +62,7 @@ export const Step05Identification: React.FC<Step05IdentificationProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Cabeçalho Limpo - Sem caixas coloridas */}
+      {/* Cabeçalho Limpo */}
       <div className="space-y-1">
         <h2 className="text-xl font-bold text-slate-900 tracking-tight font-heading">
           Identificação do Colaborador
@@ -139,44 +143,49 @@ export const Step05Identification: React.FC<Step05IdentificationProps> = ({
         </div>
       </div>
 
-      {/* Consentimentos Granulares - Design Limpo e Minimalista */}
+      {/* Consentimentos Granulares */}
       <div className="space-y-3 pt-2">
         <div className="space-y-0.5">
           <h3 className="text-sm font-bold text-slate-800">
             Autorizações por Categoria
           </h3>
           <p className="text-xs text-slate-500">
-            Você pode autorizar ou recusar cada tema. Etapas desmarcadas serão puladas automaticamente.
+            Você pode autorizar ou recusar os demais temas opcionais. Raça/Cor é obrigatório.
           </p>
         </div>
 
-        {/* Lista de Opções de Consentimento - Fundo Branco e Borda Limpa */}
+        {/* Lista de Opções de Consentimento */}
         <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl bg-white overflow-hidden">
           {[
             {
               key: "raca_cor" as const,
               title: "Raça / Cor (IBGE)",
               desc: "Classificação étnico-racial",
+              isMandatory: true,
             },
             {
               key: "pcd" as const,
               title: "Pessoa com Deficiência (PcD)",
               desc: "Acessibilidade e inclusão",
+              isMandatory: false,
             },
             {
               key: "neurodivergencia" as const,
               title: "Neurodivergência",
               desc: "TEA, TDAH, Dislexia e afins",
+              isMandatory: false,
             },
             {
               key: "lgbtqiapn" as const,
               title: "Comunidade LGBTQIAPN+",
               desc: "Diversidade de gênero e orientação",
+              isMandatory: false,
             },
             {
               key: "geral" as const,
               title: "Gênero e Faixa Etária",
               desc: "Mapeamento demográfico básico",
+              isMandatory: false,
             },
           ].map((item) => {
             const isAccepted = consentimentos[item.key];
@@ -184,12 +193,23 @@ export const Step05Identification: React.FC<Step05IdentificationProps> = ({
               <div
                 key={item.key}
                 onClick={() => toggleConsent(item.key)}
-                className="cursor-pointer p-3 sm:px-4 sm:py-3 transition-colors hover:bg-slate-50 flex items-center justify-between gap-3 select-none"
+                className={`p-3 sm:px-4 sm:py-3 transition-colors flex items-center justify-between gap-3 select-none ${
+                  item.isMandatory
+                    ? "bg-amber-50/30 cursor-default"
+                    : "cursor-pointer hover:bg-slate-50"
+                }`}
               >
                 <div>
-                  <span className="text-xs font-semibold text-slate-800 block">
-                    {item.title}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-semibold text-slate-800 block">
+                      {item.title}
+                    </span>
+                    {item.isMandatory && (
+                      <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 bg-amber-100 text-amber-800 border border-amber-300 rounded flex items-center gap-0.5">
+                        <Lock className="w-2.5 h-2.5" /> Obrigatório
+                      </span>
+                    )}
+                  </div>
                   <span className="text-[11px] text-slate-400">
                     {item.desc}
                   </span>
