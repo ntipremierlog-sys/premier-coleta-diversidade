@@ -29,7 +29,6 @@ export const RACAS_CORES = [
   { value: "parda", label: "Parda" },
   { value: "amarela", label: "Amarela" },
   { value: "indigena", label: "Indígena" },
-  { value: "nao_informado", label: "Prefiro não informar" },
 ] as const;
 
 export const OPCOES_SIM_NAO = [

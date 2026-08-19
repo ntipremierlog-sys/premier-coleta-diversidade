@@ -56,7 +56,7 @@ function FormContent() {
     } as ConsentimentosState,
 
     // Respostas
-    genero: "nao_informado",
+    genero: "",
     racaCor: "",
     pcd: "nao_informado",
     pcdTipo: "",
@@ -169,7 +169,7 @@ function FormContent() {
         return false;
       }
     } else if (currentStep.key === "genero") {
-      if (!formData.genero || formData.genero === "nao_informado") {
+      if (!formData.genero) {
         setStepError("Por favor, selecione uma opção de gênero.");
         return false;
       }
@@ -263,7 +263,7 @@ function FormContent() {
         lgbtqiapn: true,
         geral: true,
       },
-      genero: "nao_informado",
+      genero: "",
       racaCor: "",
       pcd: "nao_informado",
       pcdTipo: "",
