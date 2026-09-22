@@ -272,7 +272,10 @@ export default function AdminPage() {
         const url = `/admin/relatorio-institucional?unidade=${encodeURIComponent(
           selectedUnidade
         )}&competencia=${encodeURIComponent(selectedCompetencia)}`;
-        window.open(url, "_blank");
+        const win = window.open(url, "_blank");
+        if (!win || win.closed || typeof win.closed === "undefined") {
+          window.location.href = url;
+        }
         return;
       }
 

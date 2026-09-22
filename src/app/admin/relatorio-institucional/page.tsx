@@ -81,11 +81,16 @@ function RelatorioContent() {
             unidade
           )}&competencia=${encodeURIComponent(competencia)}`
         );
+        if (res.status === 401) {
+          router.push("/admin");
+          return;
+        }
         if (!res.ok) {
           throw new Error("Não autorizado ou erro ao carregar os dados.");
         }
-        const data = await res.json();
-        setSummary(data);
+        const json = await res.json();
+        const dataObj = json.data || json;
+        setSummary(dataObj);
       } catch (err: any) {
         setError(err.message || "Erro de carregamento");
       } finally {
@@ -93,7 +98,7 @@ function RelatorioContent() {
       }
     }
     load();
-  }, [unidade, competencia]);
+  }, [unidade, competencia, router]);
 
   const handlePrint = () => {
     window.print();
@@ -106,7 +111,46 @@ function RelatorioContent() {
     window.open(url, "_blank");
   };
 
-  const total = summary?.total || 0;
+  const total = summary?.total ?? 0;
+  const genero = summary?.genero ?? {
+    feminino: 0,
+    masculino: 0,
+    mulher_trans: 0,
+    homem_trans: 0,
+    outro: 0,
+    nao_informado: 0,
+  };
+  const racaCor = summary?.racaCor ?? {
+    branca: 0,
+    preta: 0,
+    parda: 0,
+    amarela: 0,
+    indigena: 0,
+    nao_informado: 0,
+  };
+  const pcd = summary?.pcd ?? {
+    sim: 0,
+    nao: 0,
+    nao_informado: 0,
+  };
+  const neurodivergente = summary?.neurodivergente ?? {
+    sim: 0,
+    nao: 0,
+    nao_informado: 0,
+  };
+  const faixaEtaria = summary?.faixaEtaria ?? {
+    ate_29: 0,
+    "30_44": 0,
+    "45_59": 0,
+    "60_mais": 0,
+    nao_informado: 0,
+  };
+  const lgbtqiapn = summary?.lgbtqiapn ?? {
+    sim: 0,
+    nao: 0,
+    nao_informado: 0,
+  };
+
   const calcPct = (qtd: number) =>
     total > 0 ? ((qtd / total) * 100).toFixed(1) : "0.0";
 
@@ -277,38 +321,38 @@ function RelatorioContent() {
               <tbody className="divide-y divide-slate-200">
                 <tr>
                   <td className="p-2 font-medium">Feminino</td>
-                  <td className="p-2 text-center font-bold">{summary.genero.feminino}</td>
-                  <td className="p-2 text-center">{calcPct(summary.genero.feminino)}%</td>
+                  <td className="p-2 text-center font-bold">{genero.feminino}</td>
+                  <td className="p-2 text-center">{calcPct(genero.feminino)}%</td>
                   <td className="p-2 text-slate-500">Autodeclaração individual</td>
                 </tr>
                 <tr className="bg-slate-50">
                   <td className="p-2 font-medium">Masculino</td>
-                  <td className="p-2 text-center font-bold">{summary.genero.masculino}</td>
-                  <td className="p-2 text-center">{calcPct(summary.genero.masculino)}%</td>
+                  <td className="p-2 text-center font-bold">{genero.masculino}</td>
+                  <td className="p-2 text-center">{calcPct(genero.masculino)}%</td>
                   <td className="p-2 text-slate-500">Autodeclaração individual</td>
                 </tr>
                 <tr>
                   <td className="p-2 font-medium">Mulher Trans</td>
-                  <td className="p-2 text-center font-bold">{summary.genero.mulher_trans}</td>
-                  <td className="p-2 text-center">{calcPct(summary.genero.mulher_trans)}%</td>
+                  <td className="p-2 text-center font-bold">{genero.mulher_trans}</td>
+                  <td className="p-2 text-center">{calcPct(genero.mulher_trans)}%</td>
                   <td className="p-2 text-slate-500">Autodeclaração individual</td>
                 </tr>
                 <tr className="bg-slate-50">
                   <td className="p-2 font-medium">Homem Trans</td>
-                  <td className="p-2 text-center font-bold">{summary.genero.homem_trans}</td>
-                  <td className="p-2 text-center">{calcPct(summary.genero.homem_trans)}%</td>
+                  <td className="p-2 text-center font-bold">{genero.homem_trans}</td>
+                  <td className="p-2 text-center">{calcPct(genero.homem_trans)}%</td>
                   <td className="p-2 text-slate-500">Autodeclaração individual</td>
                 </tr>
                 <tr>
                   <td className="p-2 font-medium">Outro</td>
-                  <td className="p-2 text-center font-bold">{summary.genero.outro}</td>
-                  <td className="p-2 text-center">{calcPct(summary.genero.outro)}%</td>
+                  <td className="p-2 text-center font-bold">{genero.outro}</td>
+                  <td className="p-2 text-center">{calcPct(genero.outro)}%</td>
                   <td className="p-2 text-slate-500">Identidades não-binárias / fluidas</td>
                 </tr>
                 <tr className="bg-slate-50">
                   <td className="p-2 font-medium">Prefiro não informar</td>
-                  <td className="p-2 text-center font-bold">{summary.genero.nao_informado}</td>
-                  <td className="p-2 text-center">{calcPct(summary.genero.nao_informado)}%</td>
+                  <td className="p-2 text-center font-bold">{genero.nao_informado}</td>
+                  <td className="p-2 text-center">{calcPct(genero.nao_informado)}%</td>
                   <td className="p-2 text-slate-500">Faculdade de sigilo assegurada</td>
                 </tr>
               </tbody>
@@ -331,33 +375,33 @@ function RelatorioContent() {
                 <tbody className="divide-y divide-slate-200">
                   <tr>
                     <td className="p-2">Branca</td>
-                    <td className="p-2 text-center font-bold">{summary.racaCor.branca}</td>
-                    <td className="p-2 text-center">{calcPct(summary.racaCor.branca)}%</td>
+                    <td className="p-2 text-center font-bold">{racaCor.branca}</td>
+                    <td className="p-2 text-center">{calcPct(racaCor.branca)}%</td>
                   </tr>
                   <tr className="bg-slate-50">
                     <td className="p-2">Preta</td>
-                    <td className="p-2 text-center font-bold">{summary.racaCor.preta}</td>
-                    <td className="p-2 text-center">{calcPct(summary.racaCor.preta)}%</td>
+                    <td className="p-2 text-center font-bold">{racaCor.preta}</td>
+                    <td className="p-2 text-center">{calcPct(racaCor.preta)}%</td>
                   </tr>
                   <tr>
                     <td className="p-2">Parda</td>
-                    <td className="p-2 text-center font-bold">{summary.racaCor.parda}</td>
-                    <td className="p-2 text-center">{calcPct(summary.racaCor.parda)}%</td>
+                    <td className="p-2 text-center font-bold">{racaCor.parda}</td>
+                    <td className="p-2 text-center">{calcPct(racaCor.parda)}%</td>
                   </tr>
                   <tr className="bg-slate-50">
                     <td className="p-2">Amarela</td>
-                    <td className="p-2 text-center font-bold">{summary.racaCor.amarela}</td>
-                    <td className="p-2 text-center">{calcPct(summary.racaCor.amarela)}%</td>
+                    <td className="p-2 text-center font-bold">{racaCor.amarela}</td>
+                    <td className="p-2 text-center">{calcPct(racaCor.amarela)}%</td>
                   </tr>
                   <tr>
                     <td className="p-2">Indígena</td>
-                    <td className="p-2 text-center font-bold">{summary.racaCor.indigena}</td>
-                    <td className="p-2 text-center">{calcPct(summary.racaCor.indigena)}%</td>
+                    <td className="p-2 text-center font-bold">{racaCor.indigena}</td>
+                    <td className="p-2 text-center">{calcPct(racaCor.indigena)}%</td>
                   </tr>
                   <tr className="bg-slate-50">
                     <td className="p-2">Não informado</td>
-                    <td className="p-2 text-center font-bold">{summary.racaCor.nao_informado}</td>
-                    <td className="p-2 text-center">{calcPct(summary.racaCor.nao_informado)}%</td>
+                    <td className="p-2 text-center font-bold">{racaCor.nao_informado}</td>
+                    <td className="p-2 text-center">{calcPct(racaCor.nao_informado)}%</td>
                   </tr>
                 </tbody>
               </table>
@@ -377,32 +421,32 @@ function RelatorioContent() {
                 <tbody className="divide-y divide-slate-200">
                   <tr>
                     <td className="p-2">Pessoa com Deficiência (Sim)</td>
-                    <td className="p-2 text-center font-bold">{summary.pcd.sim}</td>
-                    <td className="p-2 text-center">{calcPct(summary.pcd.sim)}%</td>
+                    <td className="p-2 text-center font-bold">{pcd.sim}</td>
+                    <td className="p-2 text-center">{calcPct(pcd.sim)}%</td>
                   </tr>
                   <tr className="bg-slate-50">
                     <td className="p-2">Não PcD</td>
-                    <td className="p-2 text-center font-bold">{summary.pcd.nao}</td>
-                    <td className="p-2 text-center">{calcPct(summary.pcd.nao)}%</td>
+                    <td className="p-2 text-center font-bold">{pcd.nao}</td>
+                    <td className="p-2 text-center">{calcPct(pcd.nao)}%</td>
                   </tr>
                   <tr>
                     <td className="p-2">Não informado</td>
-                    <td className="p-2 text-center font-bold">{summary.pcd.nao_informado}</td>
-                    <td className="p-2 text-center">{calcPct(summary.pcd.nao_informado)}%</td>
+                    <td className="p-2 text-center font-bold">{pcd.nao_informado}</td>
+                    <td className="p-2 text-center">{calcPct(pcd.nao_informado)}%</td>
                   </tr>
                   <tr className="bg-slate-100 font-semibold">
                     <td className="p-2" colSpan={3}>
-                      Neurodivergência (Sim): {summary.neurodivergente.sim} ({calcPct(summary.neurodivergente.sim)}%)
+                      Neurodivergência (Sim): {neurodivergente.sim} ({calcPct(neurodivergente.sim)}%)
                     </td>
                   </tr>
                   <tr className="bg-slate-100 font-semibold">
                     <td className="p-2" colSpan={3}>
-                      Longevidade 60+ anos: {summary.faixaEtaria["60_mais"]} ({calcPct(summary.faixaEtaria["60_mais"])}%)
+                      Longevidade 60+ anos: {faixaEtaria["60_mais"]} ({calcPct(faixaEtaria["60_mais"])}%)
                     </td>
                   </tr>
                   <tr className="bg-slate-100 font-semibold">
                     <td className="p-2" colSpan={3}>
-                      LGBTQIAPN+ (Sim): {summary.lgbtqiapn.sim} ({calcPct(summary.lgbtqiapn.sim)}%)
+                      LGBTQIAPN+ (Sim): {lgbtqiapn.sim} ({calcPct(lgbtqiapn.sim)}%)
                     </td>
                   </tr>
                 </tbody>
