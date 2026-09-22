@@ -6,12 +6,30 @@ export type AdminRole = "rh_agregado" | "rh_administrador";
 const ADMIN_COOKIE_NAME = "premier_admin_session";
 const ADMIN_ROLE_COOKIE = "premier_admin_role";
 
-const AGREGADO_SECRET = "session_rh_agregado_premier_2026";
-const MASTER_SECRET = "session_rh_administrador_master_premier_2026";
+/**
+ * Tokens de sessão lidos exclusivamente de variáveis de ambiente.
+ * Fail-fast: lança erro imediato se as variáveis não estiverem definidas,
+ * evitando que o servidor suba com segredos previsíveis hardcoded.
+ */
+function getSessionSecrets() {
+  const agregadoSecret = process.env.SESSION_SECRET_AGREGADO;
+  const masterSecret = process.env.SESSION_SECRET_MASTER;
+
+  if (!agregadoSecret || !masterSecret) {
+    throw new Error(
+      "[auth] ERRO CRÍTICO: SESSION_SECRET_AGREGADO e SESSION_SECRET_MASTER " +
+        "devem ser definidos nas variáveis de ambiente. " +
+        "Consulte o arquivo .env.example para instruções."
+    );
+  }
+
+  return { agregadoSecret, masterSecret };
+}
 
 export function setAdminSession(role: AdminRole) {
+  const { agregadoSecret, masterSecret } = getSessionSecrets();
   const cookieStore = cookies();
-  const token = role === "rh_administrador" ? MASTER_SECRET : AGREGADO_SECRET;
+  const token = role === "rh_administrador" ? masterSecret : agregadoSecret;
 
   cookieStore.set(ADMIN_COOKIE_NAME, token, {
     httpOnly: true,
@@ -37,22 +55,29 @@ export function clearAdminSession() {
 }
 
 export function getAdminSession(): { isAuthenticated: boolean; role: AdminRole | null } {
+  const { agregadoSecret, masterSecret } = getSessionSecrets();
   const cookieStore = cookies();
   const session = cookieStore.get(ADMIN_COOKIE_NAME);
 
-  if (session?.value === MASTER_SECRET) {
+  if (session?.value === masterSecret) {
     return { isAuthenticated: true, role: "rh_administrador" };
   }
-  if (session?.value === AGREGADO_SECRET) {
+  if (session?.value === agregadoSecret) {
     return { isAuthenticated: true, role: "rh_agregado" };
   }
   return { isAuthenticated: false, role: null };
 }
 
 export function verifyAdminCredentials(password: string): AdminRole | null {
-  const adminPassword = process.env.ADMIN_PASSWORD || "premier@diversidade2026";
-  const masterPassword =
-    process.env.ADMIN_MASTER_PASSWORD || "premier@adminmaster2026";
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  const masterPassword = process.env.ADMIN_MASTER_PASSWORD;
+
+  if (!adminPassword || !masterPassword) {
+    throw new Error(
+      "[auth] ERRO CRÍTICO: ADMIN_PASSWORD e ADMIN_MASTER_PASSWORD " +
+        "devem ser definidos nas variáveis de ambiente."
+    );
+  }
 
   const cleanPass = password.trim();
 

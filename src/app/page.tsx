@@ -26,6 +26,40 @@ interface StepConfig {
   isAvailable: boolean;
 }
 
+/** Estado inicial do formulário — fonte única de verdade usada em useState e handleReset */
+const INITIAL_FORM_DATA = {
+  // Unidade & Competência
+  unidade: "",
+  competencia: getCurrentCompetencia(),
+  termoConsentimento: false,
+
+  // Identificação
+  nomeCompleto: "",
+  cpf: "",
+  matricula: "",
+  hasReadTerms: false, // Confirmação de leitura das finalidades LGPD (Step05)
+
+  // Consentimentos Granulares
+  consentimentos: {
+    raca_cor: true,
+    pcd: true,
+    neurodivergencia: true,
+    lgbtqiapn: true,
+    geral: true,
+  } as ConsentimentosState,
+
+  // Respostas
+  genero: "",
+  racaCor: "",
+  pcd: "nao_informado",
+  pcdTipo: "",
+  neurodivergente: "nao_informado",
+  faixaEtaria: "nao_informado",
+  lgbtqiapn: "nao_informado",
+  outroGrupo: "",
+};
+
+
 function FormContent() {
   const searchParams = useSearchParams();
 
@@ -35,36 +69,8 @@ function FormContent() {
   const [stepError, setStepError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const [formData, setFormData] = useState({
-    // Unidade & Competência
-    unidade: "",
-    competencia: getCurrentCompetencia(),
-    termoConsentimento: false,
+  const [formData, setFormData] = useState(INITIAL_FORM_DATA);
 
-    // Identificação
-    nomeCompleto: "",
-    cpf: "",
-    matricula: "",
-
-    // Consentimentos Granulares
-    consentimentos: {
-      raca_cor: true,
-      pcd: true,
-      neurodivergencia: true,
-      lgbtqiapn: true,
-      geral: true,
-    } as ConsentimentosState,
-
-    // Respostas
-    genero: "",
-    racaCor: "",
-    pcd: "nao_informado",
-    pcdTipo: "",
-    neurodivergente: "nao_informado",
-    faixaEtaria: "nao_informado",
-    lgbtqiapn: "nao_informado",
-    outroGrupo: "",
-  });
 
   // Inicializar com parâmetros da URL se existirem
   useEffect(() => {
@@ -168,6 +174,10 @@ function FormContent() {
         setStepError("Por favor, digite um CPF válido.");
         return false;
       }
+      if (!formData.hasReadTerms) {
+        setStepError("Confirme que leu e compreendeu a finalidade do tratamento de dados (LGPD) para prosseguir.");
+        return false;
+      }
     } else if (currentStep.key === "genero") {
       if (!formData.genero) {
         setStepError("Por favor, selecione uma opção de gênero.");
@@ -250,29 +260,11 @@ function FormContent() {
     setIsSubmitted(false);
     setCurrentStepIndex(0);
     setFormData({
-      unidade: "",
-      competencia: getCurrentCompetencia(),
-      termoConsentimento: false,
-      nomeCompleto: "",
-      cpf: "",
-      matricula: "",
-      consentimentos: {
-        raca_cor: true,
-        pcd: true,
-        neurodivergencia: true,
-        lgbtqiapn: true,
-        geral: true,
-      },
-      genero: "",
-      racaCor: "",
-      pcd: "nao_informado",
-      pcdTipo: "",
-      neurodivergente: "nao_informado",
-      faixaEtaria: "nao_informado",
-      lgbtqiapn: "nao_informado",
-      outroGrupo: "",
+      ...INITIAL_FORM_DATA,
+      competencia: getCurrentCompetencia(), // Garante que a competência é sempre o mês atual
     });
   };
+
 
   const isLastStep = currentStep.key === "confirmacao";
 
@@ -309,6 +301,7 @@ function FormContent() {
                   cpf={formData.cpf}
                   matricula={formData.matricula}
                   consentimentos={formData.consentimentos}
+                  hasReadTerms={formData.hasReadTerms}
                   onUpdate={(fields) =>
                     setFormData((prev) => ({
                       ...prev,
@@ -319,6 +312,7 @@ function FormContent() {
                   error={stepError || undefined}
                 />
               )}
+
 
               {currentStep.key === "genero" && (
                 <Step1Gender

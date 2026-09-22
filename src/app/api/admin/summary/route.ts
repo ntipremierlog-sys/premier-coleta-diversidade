@@ -54,6 +54,8 @@ export async function GET(request: NextRequest) {
       genero: {
         feminino: 0,
         masculino: 0,
+        mulher_trans: 0,
+        homem_trans: 0,
         outro: 0,
         nao_informado: 0,
       },

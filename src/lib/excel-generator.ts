@@ -6,6 +6,8 @@ export interface AggregatedDiversityData {
   genero: {
     feminino: number;
     masculino: number;
+    mulher_trans: number;
+    homem_trans: number;
     outro: number;
     nao_informado: number;
   };
@@ -191,7 +193,11 @@ export async function generateDiversityExcel(
 
   // Linhas de Dados (Linhas 5 a 17)
   const totalSubmissions = data.total;
-  const generoOutroNaoInfo = data.genero.outro + data.genero.nao_informado;
+  const generoOutroNaoInfo =
+    data.genero.outro +
+    data.genero.nao_informado +
+    (data.genero.mulher_trans || 0) +
+    (data.genero.homem_trans || 0);
   const racaPretaParda = data.racaCor.preta + data.racaCor.parda;
 
   const dataRows = [
@@ -473,6 +479,8 @@ export async function generateDiversityExcel(
     const map: Record<string, string> = {
       feminino: "Feminino",
       masculino: "Masculino",
+      mulher_trans: "Mulher Trans",
+      homem_trans: "Homem Trans",
       outro: "Outro",
       branca: "Branca",
       preta: "Preta",
@@ -646,6 +654,586 @@ export async function generateDiversityExcel(
         };
       }
     });
+  });
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  return Buffer.from(buffer);
+}
+
+// =========================================================================
+// NOVO RELATÓRIO PREMIER: CONTEMPLA AS CATEGORIAS EXPANDIDAS (MULHER/HOMEM TRANS)
+// =========================================================================
+export async function generatePremierDiversityExcel(
+  data: AggregatedDiversityData,
+  submissions: SubmissionRecord[],
+  unidade: string,
+  competencia: string
+): Promise<Buffer> {
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = "Premier Logistics - Gestão Empresarial";
+  workbook.created = new Date();
+
+  const premierNavy = "180B38";
+  const premierNavyDark = "100626";
+  const borderGray = "D1D5DB";
+
+  const todayFormatted = new Date().toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+  const competenciaTexto = formatCompetencia(competencia) || "Todas / Consolidado";
+  const unidadeTexto = unidade && unidade !== "todas" ? unidade : "Consolidado Geral";
+
+  // ==========================================
+  // ABA 1: RELATÓRIO PREMIER - INDICADORES
+  // ==========================================
+  const ws1 = workbook.addWorksheet("Relatório Premier", {
+    views: [{ showGridLines: true }],
+  });
+
+  ws1.columns = [
+    { width: 28 }, // A: Grupo / Dimensão
+    { width: 34 }, // B: Categoria / Identidade
+    { width: 28 }, // C: Quantidade de profissionais
+    { width: 20 }, // D: % sobre o total
+    { width: 35 }, // E: Tipo de Autodeclaração
+    { width: 45 }, // F: Critério & Observações
+  ];
+
+  // Linha 1: Título Principal Mesclado
+  ws1.mergeCells("A1:F1");
+  const cellA1 = ws1.getCell("A1");
+  cellA1.value = "RELATÓRIO DE DIVERSIDADE & INCLUSÃO – PREMIER LOGISTICS";
+  cellA1.font = { name: "Arial", size: 13, bold: true, color: { argb: "FFFFFFFF" } };
+  cellA1.alignment = { horizontal: "center", vertical: "middle" };
+  cellA1.fill = {
+    type: "pattern",
+    pattern: "solid",
+    fgColor: { argb: premierNavyDark },
+  };
+  ws1.getRow(1).height = 32;
+
+  // Linha 2: Subtítulo
+  ws1.mergeCells("A2:F2");
+  const cellA2 = ws1.getCell("A2");
+  cellA2.value =
+    "Relatório interno corporativo com dados quantitativos segmentados em conformidade com a LGPD.";
+  cellA2.font = { name: "Arial", size: 9.5, italic: true, color: { argb: "FF4B5563" } };
+  cellA2.alignment = { horizontal: "center", vertical: "middle" };
+  cellA2.fill = {
+    type: "pattern",
+    pattern: "solid",
+    fgColor: { argb: "FFF3F4F6" },
+  };
+  ws1.getRow(2).height = 22;
+
+  // Linha 3: Metadados
+  ws1.getCell("A3").value = "Empresa:";
+  ws1.getCell("A3").font = { bold: true, size: 9.5 };
+  ws1.getCell("B3").value = `Premier Logistics Gestão Empresarial (${unidadeTexto})`;
+  ws1.getCell("B3").font = { size: 9.5 };
+
+  ws1.getCell("C3").value = "Competência:";
+  ws1.getCell("C3").font = { bold: true, size: 9.5 };
+  ws1.getCell("D3").value = competenciaTexto;
+  ws1.getCell("D3").font = { size: 9.5 };
+
+  ws1.getCell("E3").value = "Data de emissão:";
+  ws1.getCell("E3").font = { bold: true, size: 9.5 };
+  ws1.getCell("F3").value = todayFormatted;
+  ws1.getCell("F3").font = { size: 9.5 };
+
+  ws1.getRow(3).height = 24;
+  ["A3", "B3", "C3", "D3", "E3", "F3"].forEach((cellId) => {
+    const c = ws1.getCell(cellId);
+    c.alignment = { vertical: "middle" };
+    c.border = {
+      bottom: { style: "thin", color: { argb: borderGray } },
+    };
+  });
+
+  // Linha 4: Cabeçalhos
+  const headers = [
+    "Grupo / Dimensão",
+    "Categoria / Identidade",
+    "Quantidade de profissionais",
+    "% sobre o total",
+    "Tipo de Autodeclaração",
+    "Critério & Observações",
+  ];
+
+  const headerRow = ws1.getRow(4);
+  headerRow.height = 26;
+  headers.forEach((h, index) => {
+    const cell = headerRow.getCell(index + 1);
+    cell.value = h;
+    cell.font = { name: "Arial", size: 10, bold: true, color: { argb: "FFFFFFFF" } };
+    cell.alignment = {
+      horizontal: index === 2 || index === 3 ? "center" : "left",
+      vertical: "middle",
+    };
+    cell.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: premierNavy },
+    };
+    cell.border = {
+      top: { style: "medium", color: { argb: premierNavyDark } },
+      bottom: { style: "medium", color: { argb: premierNavyDark } },
+      left: { style: "thin", color: { argb: "FF374151" } },
+      right: { style: "thin", color: { argb: "FF374151" } },
+    };
+  });
+
+  const totalSubmissions = data.total;
+
+  const premierDataRows = [
+    // Gênero - Com Mulher Trans e Homem Trans destacados
+    {
+      grupo: "Gênero",
+      recorte: "Feminino",
+      qtd: data.genero.feminino,
+      obs: "Autodeclaração individual",
+      criterio: "Identidade de gênero feminina",
+    },
+    {
+      grupo: "Gênero",
+      recorte: "Masculino",
+      qtd: data.genero.masculino,
+      obs: "Autodeclaração individual",
+      criterio: "Identidade de gênero masculina",
+    },
+    {
+      grupo: "Gênero",
+      recorte: "Mulher Trans",
+      qtd: data.genero.mulher_trans || 0,
+      obs: "Autodeclaração individual",
+      criterio: "Pessoa que se identifica com o gênero feminino",
+    },
+    {
+      grupo: "Gênero",
+      recorte: "Homem Trans",
+      qtd: data.genero.homem_trans || 0,
+      obs: "Autodeclaração individual",
+      criterio: "Pessoa que se identifica com o gênero masculino",
+    },
+    {
+      grupo: "Gênero",
+      recorte: "Outro",
+      qtd: data.genero.outro,
+      obs: "Autodeclaração individual",
+      criterio: "Outras identidades não-binárias / fluidas",
+    },
+    {
+      grupo: "Gênero",
+      recorte: "Prefiro não informar",
+      qtd: data.genero.nao_informado,
+      obs: "Opção resguardada pela LGPD",
+      criterio: "Não informado / consentimento não emitido",
+    },
+    // Raça / Cor (IBGE)
+    {
+      grupo: "Raça / Cor",
+      recorte: "Branca",
+      qtd: data.racaCor.branca,
+      obs: "Classificação IBGE",
+      criterio: "Autodeclaração individual",
+    },
+    {
+      grupo: "Raça / Cor",
+      recorte: "Preta",
+      qtd: data.racaCor.preta,
+      obs: "Classificação IBGE",
+      criterio: "Autodeclaração individual",
+    },
+    {
+      grupo: "Raça / Cor",
+      recorte: "Parda",
+      qtd: data.racaCor.parda,
+      obs: "Classificação IBGE",
+      criterio: "Autodeclaração individual",
+    },
+    {
+      grupo: "Raça / Cor",
+      recorte: "Amarela",
+      qtd: data.racaCor.amarela,
+      obs: "Classificação IBGE",
+      criterio: "Autodeclaração individual",
+    },
+    {
+      grupo: "Raça / Cor",
+      recorte: "Indígena",
+      qtd: data.racaCor.indigena,
+      obs: "Classificação IBGE",
+      criterio: "Autodeclaração individual",
+    },
+    {
+      grupo: "Raça / Cor",
+      recorte: "Não informado",
+      qtd: data.racaCor.nao_informado,
+      obs: "Opção resguardada pela LGPD",
+      criterio: "Não informado individual",
+    },
+    // PcD
+    {
+      grupo: "Pessoa com deficiência",
+      recorte: "PcD (Sim)",
+      qtd: data.pcd.sim,
+      obs: "Lei Brasileira de Inclusão (13.146/2015)",
+      criterio: "Autodeclaração individual",
+    },
+    {
+      grupo: "Pessoa com deficiência",
+      recorte: "Não PcD",
+      qtd: data.pcd.nao,
+      obs: "Autodeclaração individual",
+      criterio: "Não se autodeclara pessoa com deficiência",
+    },
+    {
+      grupo: "Pessoa com deficiência",
+      recorte: "Não informado",
+      qtd: data.pcd.nao_informado,
+      obs: "Opção resguardada pela LGPD",
+      criterio: "Não informado individual",
+    },
+    // Neurodiversidade
+    {
+      grupo: "Neurodiversidade",
+      recorte: "Pessoa neurodivergente (Sim)",
+      qtd: data.neurodivergente.sim,
+      obs: "TEA, TDAH, Dislexia, etc.",
+      criterio: "Autodeclaração individual",
+    },
+    {
+      grupo: "Neurodiversidade",
+      recorte: "Não neurodivergente",
+      qtd: data.neurodivergente.nao,
+      obs: "Autodeclaração individual",
+      criterio: "Não se autodeclara neurodivergente",
+    },
+    {
+      grupo: "Neurodiversidade",
+      recorte: "Não informado",
+      qtd: data.neurodivergente.nao_informado,
+      obs: "Opção resguardada pela LGPD",
+      criterio: "Não informado individual",
+    },
+    // Faixa Etária
+    {
+      grupo: "Faixa Etária",
+      recorte: "Até 29 anos",
+      qtd: data.faixaEtaria.ate_29,
+      obs: "Jovens profissionais",
+      criterio: "Autodeclaração individual",
+    },
+    {
+      grupo: "Faixa Etária",
+      recorte: "30 a 44 anos",
+      qtd: data.faixaEtaria["30_44"],
+      obs: "Adultos",
+      criterio: "Autodeclaração individual",
+    },
+    {
+      grupo: "Faixa Etária",
+      recorte: "45 a 59 anos",
+      qtd: data.faixaEtaria["45_59"],
+      obs: "Maturidade profissional",
+      criterio: "Autodeclaração individual",
+    },
+    {
+      grupo: "Faixa Etária",
+      recorte: "60 anos ou mais",
+      qtd: data.faixaEtaria["60_mais"],
+      obs: "Estatuto da Pessoa Idosa",
+      criterio: "Autodeclaração individual",
+    },
+    {
+      grupo: "Faixa Etária",
+      recorte: "Não informado",
+      qtd: data.faixaEtaria.nao_informado,
+      obs: "Opção resguardada pela LGPD",
+      criterio: "Não informado individual",
+    },
+    // LGBTQIAPN+
+    {
+      grupo: "LGBTQIAPN+",
+      recorte: "Comunidade LGBTQIAPN+ (Sim)",
+      qtd: data.lgbtqiapn.sim,
+      obs: "Autodeclaração individual",
+      criterio: "Autodeclaração de pertencimento",
+    },
+    {
+      grupo: "LGBTQIAPN+",
+      recorte: "Não LGBTQIAPN+",
+      qtd: data.lgbtqiapn.nao,
+      obs: "Autodeclaração individual",
+      criterio: "Não pertencente à comunidade",
+    },
+    {
+      grupo: "LGBTQIAPN+",
+      recorte: "Não informado",
+      qtd: data.lgbtqiapn.nao_informado,
+      obs: "Opção resguardada pela LGPD",
+      criterio: "Não informado individual",
+    },
+    // Outros grupos
+    {
+      grupo: "Outros grupos",
+      recorte: "Outro grupo sub-representado declarado",
+      qtd: data.outroGrupoCount,
+      obs: "Grupos adicionais autodeclarados",
+      criterio: "Texto livre informado pelo colaborador",
+    },
+  ];
+
+  const totalRowNumber = 5 + premierDataRows.length;
+
+  premierDataRows.forEach((item, idx) => {
+    const rowNumber = 5 + idx;
+    const row = ws1.getRow(rowNumber);
+    row.height = 20;
+
+    row.getCell(1).value = item.grupo;
+    row.getCell(2).value = item.recorte;
+    row.getCell(3).value = item.qtd;
+
+    row.getCell(4).value = {
+      formula: `IF(C${totalRowNumber}>0, C${rowNumber}/C${totalRowNumber}, 0)`,
+      result: totalSubmissions > 0 ? item.qtd / totalSubmissions : 0,
+    };
+    row.getCell(4).numFmt = "0.00%";
+
+    row.getCell(5).value = item.obs;
+    row.getCell(6).value = item.criterio;
+
+    const isEven = idx % 2 === 0;
+    for (let c = 1; c <= 6; c++) {
+      const cell = row.getCell(c);
+      cell.font = { name: "Arial", size: 9.5 };
+      cell.border = {
+        top: { style: "thin", color: { argb: "FFE5E7EB" } },
+        bottom: { style: "thin", color: { argb: "FFE5E7EB" } },
+        left: { style: "thin", color: { argb: "FFE5E7EB" } },
+        right: { style: "thin", color: { argb: "FFE5E7EB" } },
+      };
+      if (isEven) {
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FFF9FAFB" },
+        };
+      }
+      if (c === 3 || c === 4) {
+        cell.alignment = { horizontal: "center", vertical: "middle" };
+      } else {
+        cell.alignment = { vertical: "middle" };
+      }
+    }
+  });
+
+  // Linha Total de Profissionais
+  const totalRow = ws1.getRow(totalRowNumber);
+  totalRow.height = 24;
+  totalRow.getCell(1).value = "TOTAL DE PROFISSIONAIS";
+  totalRow.getCell(2).value = "CONSIDERADOS NA BASE";
+  totalRow.getCell(3).value = totalSubmissions;
+  totalRow.getCell(4).value = 1.0;
+  totalRow.getCell(4).numFmt = "0.00%";
+  totalRow.getCell(5).value = "Base total de respondentes";
+  totalRow.getCell(6).value = "Total de autodeclarações válidas computadas no período";
+
+  for (let c = 1; c <= 6; c++) {
+    const cell = totalRow.getCell(c);
+    cell.font = { name: "Arial", size: 10, bold: true, color: { argb: premierNavyDark } };
+    cell.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFE0E7FF" },
+    };
+    cell.border = {
+      top: { style: "medium", color: { argb: premierNavy } },
+      bottom: { style: "double", color: { argb: premierNavy } },
+      left: { style: "thin", color: { argb: borderGray } },
+      right: { style: "thin", color: { argb: borderGray } },
+    };
+    if (c === 3 || c === 4) {
+      cell.alignment = { horizontal: "center", vertical: "middle" };
+    } else {
+      cell.alignment = { vertical: "middle" };
+    }
+  }
+
+  // Linhas de Orientações Premier
+  const orientacoesStartRow = totalRowNumber + 2;
+  ws1.getCell(`A${orientacoesStartRow}`).value = "DIRETRIZES & ORIENTAÇÕES PREMIER LOGISTICS:";
+  ws1.getCell(`A${orientacoesStartRow}`).font = { name: "Arial", size: 10, bold: true, color: { argb: premierNavy } };
+
+  const orientacoesPremier = [
+    "1. Relatório Premier gerado pelo Sistema de Autodeclaração de Diversidade da Premier Logistics com recorte expandido de gênero.",
+    "2. As categorias 'Mulher Trans' e 'Homem Trans' respeitam integralmente a autodeclaração e identidade do colaborador.",
+    "3. A Aba 2 apresenta a listagem com registros individuais para fins exclusivos de gestão de RH e D&I.",
+    "4. Tratamento realizado em estrita conformidade com a LGPD (Lei nº 13.709/2018), resguardando sigilo e não-discriminação.",
+  ];
+
+  orientacoesPremier.forEach((texto, i) => {
+    const r = orientacoesStartRow + 1 + i;
+    ws1.mergeCells(`A${r}:F${r}`);
+    const cell = ws1.getCell(`A${r}`);
+    cell.value = texto;
+    cell.font = { name: "Arial", size: 9, italic: true, color: { argb: "FF4B5563" } };
+    cell.alignment = { vertical: "middle" };
+  });
+
+  // ==========================================
+  // ABA 2: RESPOSTAS NOMINAIS
+  // ==========================================
+  const wsNominal = workbook.addWorksheet("Respostas Nominais", {
+    views: [{ showGridLines: true }],
+  });
+
+  wsNominal.columns = [
+    { width: 34 }, // A: Nome Completo
+    { width: 20 }, // B: CPF Mascarado
+    { width: 22 }, // C: Unidade / Filial
+    { width: 16 }, // D: Matrícula
+    { width: 18 }, // E: Competência
+    { width: 18 }, // F: Data de Envio
+    { width: 20 }, // G: Gênero
+    { width: 18 }, // H: Raça / Cor (IBGE)
+    { width: 12 }, // I: PcD
+    { width: 24 }, // J: Tipo de Deficiência
+    { width: 20 }, // K: Neurodivergência
+    { width: 18 }, // L: Faixa Etária
+    { width: 16 }, // M: LGBTQIAPN+
+    { width: 30 }, // N: Outro Grupo Declarado
+  ];
+
+  wsNominal.mergeCells("A1:N1");
+  const cellPN1 = wsNominal.getCell("A1");
+  cellPN1.value = "BASE NOMINAL DE DIVERSIDADE & INCLUSÃO – PREMIER LOGISTICS";
+  cellPN1.font = { name: "Arial", size: 12, bold: true, color: { argb: "FFFFFFFF" } };
+  cellPN1.alignment = { horizontal: "center", vertical: "middle" };
+  cellPN1.fill = {
+    type: "pattern",
+    pattern: "solid",
+    fgColor: { argb: premierNavyDark },
+  };
+  wsNominal.getRow(1).height = 28;
+
+  wsNominal.mergeCells("A2:N2");
+  const cellPN2 = wsNominal.getCell("A2");
+  cellPN2.value = `Competência: ${competenciaTexto} | Unidade: ${unidadeTexto} | Registros emitidos em: ${todayFormatted} | Relatório Premier`;
+  cellPN2.font = { name: "Arial", size: 9, italic: true, color: { argb: "FF374151" } };
+  cellPN2.alignment = { horizontal: "center", vertical: "middle" };
+  cellPN2.fill = {
+    type: "pattern",
+    pattern: "solid",
+    fgColor: { argb: "FFF3F4F6" },
+  };
+  wsNominal.getRow(2).height = 20;
+
+  const nominalHeaders = [
+    "Nome Completo",
+    "CPF",
+    "Unidade",
+    "Matrícula",
+    "Competência",
+    "Data de Envio",
+    "Gênero",
+    "Raça / Cor",
+    "PcD",
+    "Tipo de Deficiência",
+    "Neurodivergência",
+    "Faixa Etária",
+    "LGBTQIAPN+",
+    "Outro Grupo Declarado",
+  ];
+
+  const pHeaderRow = wsNominal.getRow(4);
+  pHeaderRow.height = 26;
+  nominalHeaders.forEach((h, index) => {
+    const cell = pHeaderRow.getCell(index + 1);
+    cell.value = h;
+    cell.font = { name: "Arial", size: 9.5, bold: true, color: { argb: "FFFFFFFF" } };
+    cell.alignment = { horizontal: "center", vertical: "middle" };
+    cell.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: premierNavy },
+    };
+    cell.border = {
+      top: { style: "medium", color: { argb: premierNavyDark } },
+      bottom: { style: "medium", color: { argb: premierNavyDark } },
+    };
+  });
+
+  const formatLabelPremier = (val: string) => {
+    const map: Record<string, string> = {
+      feminino: "Feminino",
+      masculino: "Masculino",
+      mulher_trans: "Mulher Trans",
+      homem_trans: "Homem Trans",
+      outro: "Outro",
+      branca: "Branca",
+      preta: "Preta",
+      parda: "Parda",
+      amarela: "Amarela",
+      indigena: "Indígena",
+      sim: "Sim",
+      nao: "Não",
+      ate_29: "Até 29 anos",
+      "30_44": "30 a 44 anos",
+      "45_59": "45 a 59 anos",
+      "60_mais": "60 anos ou mais",
+      nao_informado: "Não informado / Recusado",
+    };
+    return map[val] || val || "-";
+  };
+
+  submissions.forEach((s, idx) => {
+    const rowNum = 5 + idx;
+    const row = wsNominal.getRow(rowNum);
+    row.height = 20;
+
+    row.getCell(1).value = s.respondent?.nomeCompleto || "[Titular Anonimizado]";
+    row.getCell(2).value = s.respondent?.cpf || s.respondent?.cpfMascarado || "-";
+    row.getCell(3).value = s.unidade;
+    row.getCell(4).value = s.respondent?.matricula || "-";
+    row.getCell(5).value = formatCompetencia(s.competencia);
+    row.getCell(6).value = new Date(s.createdAt).toLocaleDateString("pt-BR");
+    row.getCell(7).value = formatLabelPremier(s.genero);
+    row.getCell(8).value = formatLabelPremier(s.racaCor);
+    row.getCell(9).value = formatLabelPremier(s.pcd);
+    row.getCell(10).value = s.pcdTipo || "-";
+    row.getCell(11).value = formatLabelPremier(s.neurodivergente);
+    row.getCell(12).value = formatLabelPremier(s.faixaEtaria);
+    row.getCell(13).value = formatLabelPremier(s.lgbtqiapn);
+    row.getCell(14).value = s.outroGrupo || "-";
+
+    const isEven = idx % 2 === 0;
+    for (let c = 1; c <= 14; c++) {
+      const cell = row.getCell(c);
+      cell.font = { name: "Arial", size: 9 };
+      cell.border = {
+        top: { style: "thin", color: { argb: "FFE5E7EB" } },
+        bottom: { style: "thin", color: { argb: "FFE5E7EB" } },
+        left: { style: "thin", color: { argb: "FFE5E7EB" } },
+        right: { style: "thin", color: { argb: "FFE5E7EB" } },
+      };
+      if (isEven) {
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FFF9FAFB" },
+        };
+      }
+      if ([2, 4, 5, 6, 9, 13].includes(c)) {
+        cell.alignment = { horizontal: "center", vertical: "middle" };
+      } else {
+        cell.alignment = { vertical: "middle" };
+      }
+    }
   });
 
   const buffer = await workbook.xlsx.writeBuffer();

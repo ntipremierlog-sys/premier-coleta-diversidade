@@ -39,6 +39,8 @@ interface SummaryData {
   genero: {
     feminino: number;
     masculino: number;
+    mulher_trans: number;
+    homem_trans: number;
     outro: number;
     nao_informado: number;
   };
@@ -132,6 +134,7 @@ export default function AdminPage() {
   const [kAnonymityAlert, setKAnonymityAlert] = useState(false);
   const [isLoadingSummary, setIsLoadingSummary] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [isExportingPremier, setIsExportingPremier] = useState(false);
   const [isExportingNominal, setIsExportingNominal] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
 
@@ -259,6 +262,34 @@ export default function AdminPage() {
     await fetch("/api/admin/logout", { method: "POST" });
     setIsAuthenticated(false);
     setUserRole(null);
+  };
+
+  const handleExportPremierExcel = async () => {
+    setIsExportingPremier(true);
+    try {
+      const url = `/api/admin/export-premier?unidade=${encodeURIComponent(
+        selectedUnidade
+      )}&competencia=${encodeURIComponent(selectedCompetencia)}`;
+
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Falha ao gerar Relatório Premier.");
+
+      const blob = await res.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = downloadUrl;
+      a.download = `Relatorio_Premier_Diversidade_${
+        selectedUnidade === "todas" ? "Consolidado" : selectedUnidade
+      }_${selectedCompetencia === "todas" ? "Geral" : selectedCompetencia}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (err: any) {
+      alert(err.message || "Erro ao baixar Relatório Premier.");
+    } finally {
+      setIsExportingPremier(false);
+    }
   };
 
   const handleExportExcel = async () => {
@@ -507,6 +538,28 @@ export default function AdminPage() {
             >
               <RefreshCw className={`w-4 h-4 ${isLoadingSummary ? "animate-spin" : ""}`} />
               <span className="hidden sm:inline">Atualizar</span>
+            </button>
+
+            {/* Relatório Premier (Novo) */}
+            <button
+              type="button"
+              id="export-premier-button"
+              onClick={handleExportPremierExcel}
+              disabled={isExportingPremier}
+              title="Exportar Relatório Premier com recorte expandido de diversidade e gênero"
+              className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-[#180B38] hover:bg-[#281458] text-white text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition-all border border-amber-400/30"
+            >
+              {isExportingPremier ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Gerando...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4 text-amber-300" />
+                  <span>Relatório Premier (.xlsx)</span>
+                </>
+              )}
             </button>
 
             <button

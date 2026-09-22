@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { formatCpfInput, validateCpf } from "@/lib/cpf-utils";
 import {
   CheckCircle2,
@@ -23,11 +23,13 @@ interface Step05IdentificationProps {
   cpf: string;
   matricula: string;
   consentimentos: ConsentimentosState;
+  hasReadTerms: boolean; // Prop controlada — estado no pai (formData)
   onUpdate: (fields: {
     nomeCompleto?: string;
     cpf?: string;
     matricula?: string;
     consentimentos?: ConsentimentosState;
+    hasReadTerms?: boolean;
   }) => void;
   error?: string;
 }
@@ -37,10 +39,10 @@ export const Step05Identification: React.FC<Step05IdentificationProps> = ({
   cpf,
   matricula,
   consentimentos,
+  hasReadTerms,
   onUpdate,
   error,
 }) => {
-  const [hasReadTerms, setHasReadTerms] = useState(false);
   const isCpfValid = cpf ? validateCpf(cpf) : false;
 
   const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -233,7 +235,7 @@ export const Step05Identification: React.FC<Step05IdentificationProps> = ({
 
       {/* Confirmação de Leitura */}
       <div
-        onClick={() => setHasReadTerms(!hasReadTerms)}
+        onClick={() => onUpdate({ hasReadTerms: !hasReadTerms })}
         className={`cursor-pointer rounded-xl border p-3.5 transition-all flex items-start gap-3 select-none ${
           hasReadTerms
             ? "border-slate-800 bg-slate-50"

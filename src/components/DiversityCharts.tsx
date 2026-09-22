@@ -24,22 +24,30 @@ export const DiversityCharts: React.FC<DiversityChartsProps> = ({ summary }) => 
   // Dados Gênero
   const fem = summary?.genero.feminino || 0;
   const masc = summary?.genero.masculino || 0;
+  const mulherTrans = summary?.genero.mulher_trans || 0;
+  const homemTrans = summary?.genero.homem_trans || 0;
   const outroGen = (summary?.genero.outro || 0) + (summary?.genero.nao_informado || 0);
 
   // Cálculos para o Donut Chart de Gênero
   const femPct = getPct(fem);
   const mascPct = getPct(masc);
-  const outroPct = Math.max(0, 100 - femPct - mascPct);
+  const mTransPct = getPct(mulherTrans);
+  const hTransPct = getPct(homemTrans);
+  const outroPct = Math.max(0, 100 - femPct - mascPct - mTransPct - hTransPct);
 
   // Circunferência do círculo R=40 => 2 * PI * 40 = 251.32
   const circumference = 251.32;
   const femStroke = (femPct / 100) * circumference;
   const mascStroke = (mascPct / 100) * circumference;
+  const mTransStroke = (mTransPct / 100) * circumference;
+  const hTransStroke = (hTransPct / 100) * circumference;
   const outroStroke = (outroPct / 100) * circumference;
 
   const femOffset = 0;
   const mascOffset = -femStroke;
-  const outroOffset = -(femStroke + mascStroke);
+  const mTransOffset = -(femStroke + mascStroke);
+  const hTransOffset = -(femStroke + mascStroke + mTransStroke);
+  const outroOffset = -(femStroke + mascStroke + mTransStroke + hTransStroke);
 
   // Dados Raça/Cor
   const racaItems = [
@@ -165,6 +173,36 @@ export const DiversityCharts: React.FC<DiversityChartsProps> = ({ summary }) => 
                       className="transition-all duration-700 ease-out"
                     />
 
+                    {/* Mulher Trans (Roxo/Violeta) */}
+                    {mTransPct > 0 && (
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="40"
+                        fill="transparent"
+                        stroke="#A855F7"
+                        strokeWidth="12"
+                        strokeDasharray={`${mTransStroke} ${circumference}`}
+                        strokeDashoffset={mTransOffset}
+                        className="transition-all duration-700 ease-out"
+                      />
+                    )}
+
+                    {/* Homem Trans (Ciano) */}
+                    {hTransPct > 0 && (
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="40"
+                        fill="transparent"
+                        stroke="#06B6D4"
+                        strokeWidth="12"
+                        strokeDasharray={`${hTransStroke} ${circumference}`}
+                        strokeDashoffset={hTransOffset}
+                        className="transition-all duration-700 ease-out"
+                      />
+                    )}
+
                     {/* Outro / Não informado (Cinza) */}
                     {outroPct > 0 && (
                       <circle
@@ -215,6 +253,28 @@ export const DiversityCharts: React.FC<DiversityChartsProps> = ({ summary }) => 
                 <div className="text-right sm:text-left">
                   <span className="text-xs font-bold text-slate-900">{masc}</span>
                   <span className="text-[11px] text-slate-400 ml-1.5">({getPctFormatted(masc)}%)</span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between sm:justify-start gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-purple-500 shrink-0" />
+                  <span className="text-xs text-slate-700 font-medium">Mulher Trans</span>
+                </div>
+                <div className="text-right sm:text-left">
+                  <span className="text-xs font-bold text-slate-900">{mulherTrans}</span>
+                  <span className="text-[11px] text-slate-400 ml-1.5">({getPctFormatted(mulherTrans)}%)</span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between sm:justify-start gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-cyan-500 shrink-0" />
+                  <span className="text-xs text-slate-700 font-medium">Homem Trans</span>
+                </div>
+                <div className="text-right sm:text-left">
+                  <span className="text-xs font-bold text-slate-900">{homemTrans}</span>
+                  <span className="text-[11px] text-slate-400 ml-1.5">({getPctFormatted(homemTrans)}%)</span>
                 </div>
               </div>
 

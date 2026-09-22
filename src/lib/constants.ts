@@ -19,6 +19,8 @@ export type UnidadeType = (typeof UNIDADES)[number];
 export const GENEROS = [
   { value: "feminino", label: "Feminino" },
   { value: "masculino", label: "Masculino" },
+  { value: "mulher_trans", label: "Mulher Trans" },
+  { value: "homem_trans", label: "Homem Trans" },
   { value: "outro", label: "Outro" },
   { value: "nao_informado", label: "Prefiro não informar" },
 ] as const;

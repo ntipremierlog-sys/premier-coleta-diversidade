@@ -4,12 +4,15 @@ import { submissionSchema } from "@/lib/validation";
 import { cleanCpf, hashCpf, maskCpf } from "@/lib/cpf-utils";
 
 // Rate limiter simples em memória
+// ⚠️  LIMITAÇÃO EM SERVERLESS: Em ambientes como Vercel, cada invocação de função
+// pode ter uma instância separada, tornando este contador ineficaz entre requisições.
+// Para produção com alto volume, substitua por Upstash Redis com @upstash/ratelimit.
 const rateLimitMap = new Map<string, { count: number; expiresAt: number }>();
 
 function checkRateLimit(ip: string): boolean {
   const now = Date.now();
-  const windowMs = 60 * 1000;
-  const maxRequests = 10;
+  const windowMs = 60 * 1000; // 1 minuto
+  const maxRequests = 5; // Reduzido de 10 para 5 por janela de 1 min
 
   const record = rateLimitMap.get(ip);
   if (!record || now > record.expiresAt) {

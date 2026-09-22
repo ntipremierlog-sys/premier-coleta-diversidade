@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAdminSession, logAccessAction } from "@/lib/auth";
-import { generateDiversityExcel, AggregatedDiversityData } from "@/lib/excel-generator";
+import { generatePremierDiversityExcel, AggregatedDiversityData } from "@/lib/excel-generator";
 
 export const dynamic = "force-dynamic";
 
@@ -108,7 +108,7 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    const excelBuffer = await generateDiversityExcel(
+    const excelBuffer = await generatePremierDiversityExcel(
       aggregated,
       submissions as any,
       unidadeParam,
@@ -119,7 +119,7 @@ export async function GET(request: NextRequest) {
     await logAccessAction({
       userId: session.role || "admin",
       acao: "export_xlsx",
-      detalhe: `Exportação Extrato consolidado .xlsx (Unidade: ${unidadeParam}, Competência: ${competenciaParam}).`,
+      detalhe: `Exportação Relatório Premier .xlsx (Unidade: ${unidadeParam}, Competência: ${competenciaParam}).`,
     });
 
     // Sanitizar nome do arquivo
@@ -131,7 +131,7 @@ export async function GET(request: NextRequest) {
       competenciaParam === "todas"
         ? "Geral"
         : competenciaParam.replace(/[^a-zA-Z0-9_-]/g, "_");
-    const filename = `Extrato_Diversidade_${unidadeSlug}_${competenciaSlug}.xlsx`;
+    const filename = `Relatorio_Premier_Diversidade_${unidadeSlug}_${competenciaSlug}.xlsx`;
 
     return new NextResponse(excelBuffer as unknown as BodyInit, {
       status: 200,
@@ -143,9 +143,9 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Erro na exportação Excel:", error);
+    console.error("Erro na exportação Relatório Premier Excel:", error);
     return NextResponse.json(
-      { error: "Erro ao gerar arquivo Excel." },
+      { error: "Erro ao gerar Relatório Premier Excel." },
       { status: 500 }
     );
   }

@@ -136,6 +136,8 @@ export async function GET(request: NextRequest) {
       const map: Record<string, string> = {
         feminino: "Feminino",
         masculino: "Masculino",
+        mulher_trans: "Mulher Trans",
+        homem_trans: "Homem Trans",
         outro: "Outro",
         branca: "Branca",
         preta: "Preta",

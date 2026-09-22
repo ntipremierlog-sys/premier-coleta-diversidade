@@ -34,7 +34,14 @@ export const submissionSchema = z.object({
 
   // Autodeclarações (preenchidas ou com fallback caso não consentido)
   genero: z
-    .enum(["feminino", "masculino", "outro", "nao_informado"])
+    .enum([
+      "feminino",
+      "masculino",
+      "mulher_trans",
+      "homem_trans",
+      "outro",
+      "nao_informado",
+    ])
     .default("nao_informado"),
   racaCor: z
     .enum(["branca", "preta", "parda", "amarela", "indigena", "nao_informado"])
