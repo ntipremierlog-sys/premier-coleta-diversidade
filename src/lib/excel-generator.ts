@@ -1239,3 +1239,391 @@ export async function generatePremierDiversityExcel(
   const buffer = await workbook.xlsx.writeBuffer();
   return Buffer.from(buffer);
 }
+
+// =========================================================================
+// RELATÓRIO INSTITUCIONAL DE CONFORMIDADE & PRÁTICAS DE INCLUSÃO
+// Modelo probatório corporativo (Excel) com ateste de voluntariedade e termos legais
+// =========================================================================
+export async function generateComplianceExcel(
+  data: AggregatedDiversityData,
+  submissions: SubmissionRecord[],
+  unidade: string,
+  competencia: string
+): Promise<Buffer> {
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = "Premier Logistics - Gestão Empresarial / Conformidade";
+  workbook.created = new Date();
+
+  const premierNavy = "180B38";
+  const premierNavyDark = "100626";
+  const borderGray = "D1D5DB";
+
+  const todayFormatted = new Date().toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  const competenciaTexto = formatCompetencia(competencia) || "Todas / Consolidado";
+  const unidadeTexto = unidade && unidade !== "todas" ? unidade : "Consolidado Geral";
+
+  // ==========================================
+  // ABA 1: DECLARAÇÃO INSTITUCIONAL & CONFORMIDADE
+  // ==========================================
+  const ws1 = workbook.addWorksheet("Declaração Institucional", {
+    views: [{ showGridLines: true }],
+  });
+
+  ws1.columns = [{ width: 26 }, { width: 85 }];
+
+  // Cabeçalho Principal
+  ws1.mergeCells("A1:B1");
+  const h1 = ws1.getCell("A1");
+  h1.value = "RELATÓRIO INSTITUCIONAL DE PRÁTICAS DE INCLUSÃO, DIVERSIDADE & GOVERNANÇA";
+  h1.font = { name: "Arial", size: 12, bold: true, color: { argb: "FFFFFFFF" } };
+  h1.alignment = { horizontal: "center", vertical: "middle" };
+  h1.fill = {
+    type: "pattern",
+    pattern: "solid",
+    fgColor: { argb: premierNavyDark },
+  };
+  ws1.getRow(1).height = 32;
+
+  // Subtítulo
+  ws1.mergeCells("A2:B2");
+  const h2 = ws1.getCell("A2");
+  h2.value =
+    "Demonstrativo oficial de conformidade legal, voluntariedade de participação e políticas afirmativas da Premier Logistics.";
+  h2.font = { name: "Arial", size: 9.5, italic: true, color: { argb: "FF4B5563" } };
+  h2.alignment = { horizontal: "center", vertical: "middle" };
+  h2.fill = {
+    type: "pattern",
+    pattern: "solid",
+    fgColor: { argb: "FFF3F4F6" },
+  };
+  ws1.getRow(2).height = 22;
+
+  // Bloco de Identificação
+  const metaRows = [
+    ["Organização:", `Premier Logistics Gestão Empresarial Ltda. (${unidadeTexto})`],
+    ["Competência de Apuração:", competenciaTexto],
+    ["Data e Hora de Emissão:", todayFormatted],
+    ["Total de Colaboradores Participantes:", `${data.total} profissionais válidos`],
+    ["Finalidade do Relatório:", "Comprovação institucional de boas práticas, conformidade LGPD e ações afirmativas de diversidade."],
+  ];
+
+  metaRows.forEach((r, idx) => {
+    const rowNum = 4 + idx;
+    const row = ws1.getRow(rowNum);
+    row.height = 22;
+    row.getCell(1).value = r[0];
+    row.getCell(1).font = { name: "Arial", size: 9.5, bold: true, color: { argb: premierNavy } };
+    row.getCell(2).value = r[1];
+    row.getCell(2).font = { name: "Arial", size: 9.5 };
+    [1, 2].forEach((c) => {
+      row.getCell(c).border = { bottom: { style: "thin", color: { argb: borderGray } } };
+      row.getCell(c).alignment = { vertical: "middle" };
+    });
+  });
+
+  // Título da Declaração Formal
+  ws1.mergeCells("A10:B10");
+  const decHeader = ws1.getCell("A10");
+  decHeader.value = "DECLARAÇÃO FORMAL DE VOLUNTARIEDADE E NÃO-DISCRIMINAÇÃO";
+  decHeader.font = { name: "Arial", size: 10, bold: true, color: { argb: "FFFFFFFF" } };
+  decHeader.alignment = { horizontal: "left", vertical: "middle", indent: 1 };
+  decHeader.fill = {
+    type: "pattern",
+    pattern: "solid",
+    fgColor: { argb: premierNavy },
+  };
+  ws1.getRow(10).height = 26;
+
+  const declaracoes = [
+    "1. NÃO-DISCRIMINAÇÃO E IGUALDADE DE OPORTUNIDADES: A Premier Logistics reafirma seu compromisso incondicional com a promoção de um ambiente de trabalho inclusivo, equânime e livre de qualquer forma de discriminação direta ou indireta, em consonância com a Constituição da República Federativa do Brasil (Art. 3º, IV e Art. 5º) e a Convenção nº 111 da Organização Internacional do Trabalho (OIT).",
+    "2. VOLUNTARIEDADE E FACULTATIVIDADE DA PARTICIPAÇÃO: A autodeclaração de dados cadastrais e de diversidade é ato estritamente voluntário e facultativo do profissional. O sistema assegurou de forma inequívoca o direito à opção 'Prefiro não informar' e a possibilidade de recusa individual para cada categoria sensível, sem que disso decorresse qualquer distinção, restrição, prejuízo ou efeito funcional/contratual negativo sobre a relação de trabalho.",
+    "3. PROTEÇÃO DE DADOS (LGPD): Todos os tratamentos de dados pessoais observam estritamente a Lei Geral de Proteção de Dados (Lei nº 13.709/2018 - Arts. 7º, I e 11, I). As informações são tratadas sob sigilo profissional, com salvaguardas técnicas, criptografia de dados cadastrais (hash HMAC determinístico) e acesso restrito exclusivamente aos profissionais autorizados da área de Recursos Humanos e Governança.",
+    "4. SNAPSHOT DOS TERMOS EXIBIDOS AO COLABORADOR: Conforme registrado no sistema no momento da interação, o texto de esclarecimento apresentado de forma prévia a todos os colaboradores foi: 'Estas informações serão utilizadas para atualização da base cadastral da Premier Logistics e construção de indicadores internos de diversidade e inclusão, nos termos da LGPD (Lei nº 13.709/2018). A recusa não gera nenhum efeito negativo sobre a relação de trabalho.'",
+    "5. INTEGRIDADE E RASTREABILIDADE: O sistema corporativo registra trilha de auditoria para todas as operações de consulta, emissão e exportação, preservando o anonimato estatístico dos profissionais nos indicadores consolidados.",
+  ];
+
+  declaracoes.forEach((dec, idx) => {
+    const rowNum = 11 + idx;
+    ws1.mergeCells(`A${rowNum}:B${rowNum}`);
+    const cell = ws1.getCell(`A${rowNum}`);
+    cell.value = dec;
+    cell.font = { name: "Arial", size: 9, color: { argb: "FF374151" } };
+    cell.alignment = { vertical: "middle", wrapText: true };
+    cell.border = {
+      top: { style: "thin", color: { argb: "FFE5E7EB" } },
+      bottom: { style: "thin", color: { argb: "FFE5E7EB" } },
+      left: { style: "thin", color: { argb: "FFE5E7EB" } },
+      right: { style: "thin", color: { argb: "FFE5E7EB" } },
+    };
+    ws1.getRow(rowNum).height = 42;
+  });
+
+  // Assinatura Institucional
+  const signRow = 17;
+  ws1.mergeCells(`A${signRow}:B${signRow}`);
+  const signCell = ws1.getCell(`A${signRow}`);
+  signCell.value = "Premier Logistics Gestão Empresarial Ltda. • Diretoria de Recursos Humanos, D&I e Conformidade Legal";
+  signCell.font = { name: "Arial", size: 9.5, italic: true, bold: true, color: { argb: premierNavy } };
+  signCell.alignment = { horizontal: "center", vertical: "middle" };
+  ws1.getRow(signRow).height = 30;
+
+  // ==========================================
+  // ABA 2: QUADRO CONSOLIDADO DE INDICADORES
+  // ==========================================
+  const ws2 = workbook.addWorksheet("Quadro de Indicadores", {
+    views: [{ showGridLines: true }],
+  });
+
+  ws2.columns = [
+    { width: 28 }, // Dimensão
+    { width: 34 }, // Categoria
+    { width: 26 }, // Quantidade
+    { width: 20 }, // % sobre Total
+    { width: 38 }, // Base Normativa / Critério
+  ];
+
+  ws2.mergeCells("A1:E1");
+  const qh1 = ws2.getCell("A1");
+  qh1.value = "QUADRO OFICIAL DE INDICADORES DE DIVERSIDADE & INCLUSÃO";
+  qh1.font = { name: "Arial", size: 12, bold: true, color: { argb: "FFFFFFFF" } };
+  qh1.alignment = { horizontal: "center", vertical: "middle" };
+  qh1.fill = {
+    type: "pattern",
+    pattern: "solid",
+    fgColor: { argb: premierNavyDark },
+  };
+  ws2.getRow(1).height = 30;
+
+  ws2.mergeCells("A2:E2");
+  const qh2 = ws2.getCell("A2");
+  qh2.value = `Unidade: ${unidadeTexto} | Competência: ${competenciaTexto} | Base total: ${data.total} colaboradores respondentes`;
+  qh2.font = { name: "Arial", size: 9.5, italic: true, color: { argb: "FF4B5563" } };
+  qh2.alignment = { horizontal: "center", vertical: "middle" };
+  qh2.fill = {
+    type: "pattern",
+    pattern: "solid",
+    fgColor: { argb: "FFF3F4F6" },
+  };
+  ws2.getRow(2).height = 20;
+
+  const tHeaders = [
+    "Dimensão / Grupo",
+    "Categoria Declarada",
+    "Quantidade de Profissionais",
+    "% sobre o Total",
+    "Critério & Base Normativa",
+  ];
+
+  const tHeaderRow = ws2.getRow(4);
+  tHeaderRow.height = 26;
+  tHeaders.forEach((h, index) => {
+    const cell = tHeaderRow.getCell(index + 1);
+    cell.value = h;
+    cell.font = { name: "Arial", size: 9.5, bold: true, color: { argb: "FFFFFFFF" } };
+    cell.alignment = {
+      horizontal: index === 2 || index === 3 ? "center" : "left",
+      vertical: "middle",
+    };
+    cell.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: premierNavy },
+    };
+    cell.border = {
+      top: { style: "medium", color: { argb: premierNavyDark } },
+      bottom: { style: "medium", color: { argb: premierNavyDark } },
+    };
+  });
+
+  const totalSubmissions = data.total;
+
+  const complianceRows = [
+    // Gênero
+    { grupo: "Gênero", categoria: "Feminino", qtd: data.genero.feminino, ref: "Autodeclaração individual de gênero" },
+    { grupo: "Gênero", categoria: "Masculino", qtd: data.genero.masculino, ref: "Autodeclaração individual de gênero" },
+    { grupo: "Gênero", categoria: "Mulher Trans", qtd: data.genero.mulher_trans || 0, ref: "Identidade de gênero autodeclarada" },
+    { grupo: "Gênero", categoria: "Homem Trans", qtd: data.genero.homem_trans || 0, ref: "Identidade de gênero autodeclarada" },
+    { grupo: "Gênero", categoria: "Outro", qtd: data.genero.outro, ref: "Identidades não-binárias / fluidas" },
+    { grupo: "Gênero", categoria: "Prefiro não informar", qtd: data.genero.nao_informado, ref: "Faculdade de sigilo assegurada pela LGPD" },
+    // Raça / Cor (IBGE)
+    { grupo: "Raça / Cor", categoria: "Branca", qtd: data.racaCor.branca, ref: "Classificação oficial IBGE" },
+    { grupo: "Raça / Cor", categoria: "Preta", qtd: data.racaCor.preta, ref: "Classificação oficial IBGE / Estatuto Igualdade Racial" },
+    { grupo: "Raça / Cor", categoria: "Parda", qtd: data.racaCor.parda, ref: "Classificação oficial IBGE / Estatuto Igualdade Racial" },
+    { grupo: "Raça / Cor", categoria: "Amarela", qtd: data.racaCor.amarela, ref: "Classificação oficial IBGE" },
+    { grupo: "Raça / Cor", categoria: "Indígena", qtd: data.racaCor.indigena, ref: "Classificação oficial IBGE" },
+    { grupo: "Raça / Cor", categoria: "Não informado", qtd: data.racaCor.nao_informado, ref: "Faculdade de sigilo assegurada pela LGPD" },
+    // PcD
+    { grupo: "Pessoa com Deficiência", categoria: "PcD (Sim)", qtd: data.pcd.sim, ref: "Lei Brasileira de Inclusão (Lei 13.146/2015)" },
+    { grupo: "Pessoa com Deficiência", categoria: "Não PcD", qtd: data.pcd.nao, ref: "Não se autodeclara pessoa com deficiência" },
+    { grupo: "Pessoa com Deficiência", categoria: "Não informado", qtd: data.pcd.nao_informado, ref: "Faculdade de sigilo assegurada pela LGPD" },
+    // Neurodiversidade
+    { grupo: "Neurodiversidade", categoria: "Pessoa neurodivergente (Sim)", qtd: data.neurodivergente.sim, ref: "TDAH, TEA, Dislexia e afins (Autodeclaração)" },
+    { grupo: "Neurodiversidade", categoria: "Não neurodivergente", qtd: data.neurodivergente.nao, ref: "Não se autodeclara neurodivergente" },
+    { grupo: "Neurodiversidade", categoria: "Não informado", qtd: data.neurodivergente.nao_informado, ref: "Faculdade de sigilo assegurada pela LGPD" },
+    // Faixa Etária
+    { grupo: "Faixa Etária", categoria: "Até 29 anos", qtd: data.faixaEtaria.ate_29, ref: "Jovens profissionais em início de carreira" },
+    { grupo: "Faixa Etária", categoria: "30 a 44 anos", qtd: data.faixaEtaria["30_44"], ref: "Profissionais plenos / adultos" },
+    { grupo: "Faixa Etária", categoria: "45 a 59 anos", qtd: data.faixaEtaria["45_59"], ref: "Maturidade profissional" },
+    { grupo: "Faixa Etária", categoria: "60 anos ou mais", qtd: data.faixaEtaria["60_mais"], ref: "Estatuto da Pessoa Idosa (Lei nº 10.741/2003)" },
+    { grupo: "Faixa Etária", categoria: "Não informado", qtd: data.faixaEtaria.nao_informado, ref: "Faculdade de sigilo assegurada pela LGPD" },
+    // LGBTQIAPN+
+    { grupo: "LGBTQIAPN+", categoria: "Comunidade LGBTQIAPN+ (Sim)", qtd: data.lgbtqiapn.sim, ref: "Autodeclaração de pertencimento" },
+    { grupo: "LGBTQIAPN+", categoria: "Não LGBTQIAPN+", qtd: data.lgbtqiapn.nao, ref: "Não pertencente à comunidade" },
+    { grupo: "LGBTQIAPN+", categoria: "Não informado", qtd: data.lgbtqiapn.nao_informado, ref: "Faculdade de sigilo assegurada pela LGPD" },
+    // Outros grupos
+    { grupo: "Outros Grupos", categoria: "Outro grupo sub-representado", qtd: data.outroGrupoCount, ref: "Texto livre autodeclarado pelo profissional" },
+  ];
+
+  const totalRowIndex = 5 + complianceRows.length;
+
+  complianceRows.forEach((item, idx) => {
+    const rowNum = 5 + idx;
+    const row = ws2.getRow(rowNum);
+    row.height = 20;
+
+    row.getCell(1).value = item.grupo;
+    row.getCell(2).value = item.categoria;
+    row.getCell(3).value = item.qtd;
+
+    row.getCell(4).value = {
+      formula: `IF(C${totalRowIndex}>0, C${rowNum}/C${totalRowIndex}, 0)`,
+      result: totalSubmissions > 0 ? item.qtd / totalSubmissions : 0,
+    };
+    row.getCell(4).numFmt = "0.00%";
+    row.getCell(5).value = item.ref;
+
+    const isEven = idx % 2 === 0;
+    for (let c = 1; c <= 5; c++) {
+      const cell = row.getCell(c);
+      cell.font = { name: "Arial", size: 9.5 };
+      cell.border = {
+        top: { style: "thin", color: { argb: "FFE5E7EB" } },
+        bottom: { style: "thin", color: { argb: "FFE5E7EB" } },
+        left: { style: "thin", color: { argb: "FFE5E7EB" } },
+        right: { style: "thin", color: { argb: "FFE5E7EB" } },
+      };
+      if (isEven) {
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FFF9FAFB" },
+        };
+      }
+      if (c === 3 || c === 4) {
+        cell.alignment = { horizontal: "center", vertical: "middle" };
+      } else {
+        cell.alignment = { vertical: "middle" };
+      }
+    }
+  });
+
+  // Linha Total de Respondentes
+  const totalRow = ws2.getRow(totalRowIndex);
+  totalRow.height = 24;
+  totalRow.getCell(1).value = "TOTAL DE COLABORADORES";
+  totalRow.getCell(2).value = "RESPONDENTES CONSIDERADOS";
+  totalRow.getCell(3).value = totalSubmissions;
+  totalRow.getCell(4).value = 1.0;
+  totalRow.getCell(4).numFmt = "0.00%";
+  totalRow.getCell(5).value = "Base total de autodeclarações válidas apuradas no período";
+
+  for (let c = 1; c <= 5; c++) {
+    const cell = totalRow.getCell(c);
+    cell.font = { name: "Arial", size: 10, bold: true, color: { argb: premierNavyDark } };
+    cell.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFE0E7FF" },
+    };
+    cell.border = {
+      top: { style: "medium", color: { argb: premierNavy } },
+      bottom: { style: "double", color: { argb: premierNavy } },
+    };
+    if (c === 3 || c === 4) {
+      cell.alignment = { horizontal: "center", vertical: "middle" };
+    } else {
+      cell.alignment = { vertical: "middle" };
+    }
+  }
+
+  // ==========================================
+  // ABA 3: FUNDAMENTAÇÃO LEGAL & METODOLOGIA
+  // ==========================================
+  const ws3 = workbook.addWorksheet("Metodologia & Fundamentos", {
+    views: [{ showGridLines: true }],
+  });
+
+  ws3.columns = [{ width: 30 }, { width: 85 }];
+
+  ws3.mergeCells("A1:B1");
+  const mh1 = ws3.getCell("A1");
+  mh1.value = "QUADRO NORMATIVO & CRITÉRIOS METODOLÓGICOS APLICÁVEIS";
+  mh1.font = { name: "Arial", size: 11, bold: true, color: { argb: "FFFFFFFF" } };
+  mh1.alignment = { horizontal: "center", vertical: "middle" };
+  mh1.fill = {
+    type: "pattern",
+    pattern: "solid",
+    fgColor: { argb: premierNavyDark },
+  };
+  ws3.getRow(1).height = 28;
+
+  const legalItems = [
+    {
+      diploma: "Constituição Federal de 1988",
+      detalhe: "Art. 3º, IV (promoção do bem de todos, sem preconceitos de origem, raça, sexo, cor, idade) e Art. 5º (isonomia e dignidade da pessoa humana).",
+    },
+    {
+      diploma: "Convenção nº 111 da OIT",
+      detalhe: "Convenção sobre a Discriminação em Matéria de Emprego e Ocupação (promulgada pelo Decreto nº 62.150/1968), orientando a adoção de políticas ativas de não-discriminação.",
+    },
+    {
+      diploma: "Lei nº 13.709/2018 (LGPD)",
+      detalhe: "Art. 7º, I e Art. 11, I e II: Coleta e tratamento legítimo de dados sensíveis com consentimento expresso, específico e facultativo para fins de atualização cadastral e políticas de diversidade.",
+    },
+    {
+      diploma: "Lei nº 13.146/2015 (LBI)",
+      detalhe: "Lei Brasileira de Inclusão da Pessoa com Deficiência: Respeito à autodeclaração e garantia de acessibilidade e adaptações razoáveis no ambiente corporativo.",
+    },
+    {
+      diploma: "Lei nº 12.288/2010",
+      detalhe: "Estatuto da Igualdade Racial: Utilização dos critérios e categorias oficiais do IBGE (branca, preta, parda, amarela, indígena) para mapeamento da força de trabalho.",
+    },
+    {
+      diploma: "Lei nº 14.611/2023",
+      detalhe: "Lei de Igualdade Salarial e de Critérios Remuneratórios entre Mulheres e Homens: Incentivo a práticas de transparência, diversidade e inclusão de grupos sub-representados.",
+    },
+    {
+      diploma: "Lei nº 10.741/2003",
+      detalhe: "Estatuto da Pessoa Idosa: Proteção e valorização do profissional com 60 anos ou mais na estrutura funcional.",
+    },
+  ];
+
+  legalItems.forEach((item, idx) => {
+    const rowNum = 3 + idx;
+    const row = ws3.getRow(rowNum);
+    row.height = 36;
+    row.getCell(1).value = item.diploma;
+    row.getCell(1).font = { name: "Arial", size: 9.5, bold: true, color: { argb: premierNavy } };
+    row.getCell(2).value = item.detalhe;
+    row.getCell(2).font = { name: "Arial", size: 9 };
+    [1, 2].forEach((c) => {
+      row.getCell(c).alignment = { vertical: "middle", wrapText: true };
+      row.getCell(c).border = {
+        top: { style: "thin", color: { argb: "FFE5E7EB" } },
+        bottom: { style: "thin", color: { argb: "FFE5E7EB" } },
+        left: { style: "thin", color: { argb: "FFE5E7EB" } },
+        right: { style: "thin", color: { argb: "FFE5E7EB" } },
+      };
+    });
+  });
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  return Buffer.from(buffer);
+}
+

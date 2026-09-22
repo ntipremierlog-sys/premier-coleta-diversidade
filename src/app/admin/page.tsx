@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import React, { useState, useEffect, useCallback } from "react";
 import { Header } from "@/components/Header";
 import { UNIDADES, formatCompetencia, getCurrentCompetencia } from "@/lib/constants";
@@ -132,11 +134,10 @@ export default function AdminPage() {
   const [availableCompetencias, setAvailableCompetencias] = useState<string[]>([]);
   const [availableUnidades, setAvailableUnidades] = useState<string[]>([]);
   const [kAnonymityAlert, setKAnonymityAlert] = useState(false);
-  const [isLoadingSummary, setIsLoadingSummary] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
-  const [isExportingPremier, setIsExportingPremier] = useState(false);
-  const [isExportingNominal, setIsExportingNominal] = useState(false);
+  const [selectedReportType, setSelectedReportType] = useState("institucional_pdf");
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [isLoadingSummary, setIsLoadingSummary] = useState(false);
 
   // Módulo de Titulares
   const [searchQuery, setSearchQuery] = useState("");
@@ -264,85 +265,58 @@ export default function AdminPage() {
     setUserRole(null);
   };
 
-  const handleExportPremierExcel = async () => {
-    setIsExportingPremier(true);
+  const handleGenerateSelectedReport = async () => {
+    setIsGeneratingReport(true);
     try {
-      const url = `/api/admin/export-premier?unidade=${encodeURIComponent(
+      if (selectedReportType === "institucional_pdf") {
+        const url = `/admin/relatorio-institucional?unidade=${encodeURIComponent(
+          selectedUnidade
+        )}&competencia=${encodeURIComponent(selectedCompetencia)}`;
+        window.open(url, "_blank");
+        return;
+      }
+
+      let endpoint = "/api/admin/export-compliance";
+      let defaultFilename = "Relatorio_Institucional_Conformidade";
+
+      if (selectedReportType === "institucional_xlsx") {
+        endpoint = "/api/admin/export-compliance";
+        defaultFilename = "Relatorio_Institucional_Conformidade";
+      } else if (selectedReportType === "premier_xlsx") {
+        endpoint = "/api/admin/export-premier";
+        defaultFilename = "Relatorio_Premier_Diversidade";
+      } else if (selectedReportType === "extrato_xlsx") {
+        endpoint = "/api/admin/export";
+        defaultFilename = "Extrato_Diversidade";
+      } else if (selectedReportType === "nominal_xlsx") {
+        endpoint = "/api/admin/export-nominal";
+        defaultFilename = "Extrato_Nominal_Restrito";
+      }
+
+      const url = `${endpoint}?unidade=${encodeURIComponent(
         selectedUnidade
       )}&competencia=${encodeURIComponent(selectedCompetencia)}`;
 
       const res = await fetch(url);
-      if (!res.ok) throw new Error("Falha ao gerar Relatório Premier.");
+      if (!res.ok) throw new Error("Falha ao gerar o arquivo de relatório.");
 
       const blob = await res.blob();
       const downloadUrl = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = downloadUrl;
-      a.download = `Relatorio_Premier_Diversidade_${
-        selectedUnidade === "todas" ? "Consolidado" : selectedUnidade
-      }_${selectedCompetencia === "todas" ? "Geral" : selectedCompetencia}.xlsx`;
+      const unidadeSlug =
+        selectedUnidade === "todas" ? "Consolidado" : selectedUnidade;
+      const compSlug =
+        selectedCompetencia === "todas" ? "Geral" : selectedCompetencia;
+      a.download = `${defaultFilename}_${unidadeSlug}_${compSlug}.xlsx`;
       document.body.appendChild(a);
       a.click();
       a.remove();
       window.URL.revokeObjectURL(downloadUrl);
     } catch (err: any) {
-      alert(err.message || "Erro ao baixar Relatório Premier.");
+      alert(err.message || "Erro ao gerar relatório.");
     } finally {
-      setIsExportingPremier(false);
-    }
-  };
-
-  const handleExportExcel = async () => {
-    setIsExporting(true);
-    try {
-      const url = `/api/admin/export?unidade=${encodeURIComponent(
-        selectedUnidade
-      )}&competencia=${encodeURIComponent(selectedCompetencia)}`;
-
-      const res = await fetch(url);
-      if (!res.ok) throw new Error("Falha ao gerar planilha Excel.");
-
-      const blob = await res.blob();
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = downloadUrl;
-      a.download = `Extrato_Diversidade_${
-        selectedUnidade === "todas" ? "Consolidado" : selectedUnidade
-      }_${selectedCompetencia === "todas" ? "Geral" : selectedCompetencia}.xlsx`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(downloadUrl);
-    } catch (err: any) {
-      alert(err.message || "Erro ao baixar arquivo.");
-    } finally {
-      setIsExporting(false);
-    }
-  };
-
-  const handleExportNominalExcel = async () => {
-    setIsExportingNominal(true);
-    try {
-      const url = `/api/admin/export-nominal?unidade=${encodeURIComponent(
-        selectedUnidade
-      )}&competencia=${encodeURIComponent(selectedCompetencia)}`;
-
-      const res = await fetch(url);
-      if (!res.ok) throw new Error("Falha ao gerar exportação nominal.");
-
-      const blob = await res.blob();
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = downloadUrl;
-      a.download = `Extrato_Nominal_Restrito_${selectedUnidade}_${selectedCompetencia}.xlsx`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(downloadUrl);
-    } catch (err: any) {
-      alert(err.message || "Erro ao baixar arquivo nominal.");
-    } finally {
-      setIsExportingNominal(false);
+      setIsGeneratingReport(false);
     }
   };
 
@@ -540,70 +514,43 @@ export default function AdminPage() {
               <span className="hidden sm:inline">Atualizar</span>
             </button>
 
-            {/* Relatório Premier (Novo) */}
-            <button
-              type="button"
-              id="export-premier-button"
-              onClick={handleExportPremierExcel}
-              disabled={isExportingPremier}
-              title="Exportar Relatório Premier com recorte expandido de diversidade e gênero"
-              className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-[#180B38] hover:bg-[#281458] text-white text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition-all border border-amber-400/30"
-            >
-              {isExportingPremier ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Gerando...</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-4 h-4 text-amber-300" />
-                  <span>Relatório Premier (.xlsx)</span>
-                </>
-              )}
-            </button>
+            {/* CAIXA DE SELEÇÃO UNIFICADA DE RELATÓRIOS */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <select
+                id="report-type-select"
+                value={selectedReportType}
+                onChange={(e) => setSelectedReportType(e.target.value)}
+                className="bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#180B38]/30 shadow-sm cursor-pointer"
+              >
+                <option value="institucional_pdf">📄 Relatório Institucional (.pdf)</option>
+                <option value="institucional_xlsx">📊 Relatório Institucional (.xlsx)</option>
+                <option value="premier_xlsx">✨ Relatório Premier (.xlsx)</option>
+                <option value="extrato_xlsx">📑 Extrato de Diversidade (.xlsx)</option>
+                {userRole === "rh_administrador" && (
+                  <option value="nominal_xlsx">🔒 Base Nominal Restrita (.xlsx)</option>
+                )}
+              </select>
 
-            <button
-              type="button"
-              id="export-excel-button"
-              onClick={handleExportExcel}
-              disabled={isExporting}
-              className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition-all"
-            >
-              {isExporting ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Gerando...</span>
-                </>
-              ) : (
-                <>
-                  <Download className="w-4 h-4" />
-                  <span>Extrato (.xlsx)</span>
-                </>
-              )}
-            </button>
-
-            {userRole === "rh_administrador" && (
               <button
                 type="button"
-                id="export-nominal-button"
-                onClick={handleExportNominalExcel}
-                disabled={isExportingNominal}
-                title="Exportar base nominal restrita com dados de titulares"
-                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-purple-700 hover:bg-purple-800 text-white text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition-all"
+                id="generate-report-button"
+                onClick={handleGenerateSelectedReport}
+                disabled={isGeneratingReport}
+                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#180B38] hover:bg-[#281458] text-white text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition-all disabled:opacity-50"
               >
-                {isExportingNominal ? (
+                {isGeneratingReport ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Exportando...</span>
+                    <span>Gerando...</span>
                   </>
                 ) : (
                   <>
-                    <FileText className="w-4 h-4" />
-                    <span>Base Nominal (.xlsx)</span>
+                    <Download className="w-4 h-4" />
+                    <span>Gerar Relatório</span>
                   </>
                 )}
               </button>
-            )}
+            </div>
 
             <button
               type="button"
