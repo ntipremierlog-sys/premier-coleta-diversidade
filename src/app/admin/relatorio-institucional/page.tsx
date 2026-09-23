@@ -4,7 +4,18 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { PremierLogo } from "@/components/PremierLogo";
 import { formatCompetencia } from "@/lib/constants";
-import { Printer, ArrowLeft, Download, ShieldCheck, CheckCircle2 } from "lucide-react";
+import {
+  Printer,
+  ArrowLeft,
+  Download,
+  ShieldCheck,
+  CheckCircle2,
+  Building2,
+  Calendar,
+  Users,
+  FileCheck2,
+  Lock,
+} from "lucide-react";
 
 interface SummaryData {
   total: number;
@@ -155,14 +166,14 @@ function RelatorioContent() {
     total > 0 ? ((qtd / total) * 100).toFixed(1) : "0.0";
 
   const unidadeTexto = unidade === "todas" ? "Consolidado Geral (Todas as Filiais)" : unidade;
-  const competenciaTexto = formatCompetencia(competencia) || "Todas as Competências";
+  const competenciaTexto = formatCompetencia(competencia) || "Todas as Competências (Histórico Geral)";
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-600">
         <div className="text-center space-y-3">
           <div className="w-8 h-8 border-3 border-premier-primary border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-sm font-semibold">Gerando documento institucional...</p>
+          <p className="text-xs font-semibold text-slate-500">Gerando relatório de conformidade...</p>
         </div>
       </div>
     );
@@ -185,13 +196,13 @@ function RelatorioContent() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 print:bg-white text-slate-800">
-      {/* BARRA SUPERIOR (OCULTA NA IMPRESSÃO) */}
-      <header className="no-print sticky top-0 z-30 bg-white border-b border-slate-200 px-4 py-3 shadow-sm">
+    <div className="min-h-screen bg-slate-100 print:bg-white text-slate-800 font-sans antialiased">
+      {/* BARRA DE AÇÕES SUPERIOR (OCULTA AUTOMATICAMENTE NA IMPRESSÃO / PDF) */}
+      <header className="no-print sticky top-0 z-30 bg-white border-b border-slate-200 px-4 py-3 shadow-xs">
         <div className="max-w-5xl mx-auto flex items-center justify-between gap-3">
           <button
             onClick={() => router.push("/admin")}
-            className="inline-flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-slate-900 px-3 py-2 rounded-lg hover:bg-slate-100 transition-all"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 px-3 py-2 rounded-lg hover:bg-slate-100 transition-all cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Voltar ao Painel</span>
@@ -200,7 +211,7 @@ function RelatorioContent() {
           <div className="flex items-center gap-2">
             <button
               onClick={handleDownloadExcel}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition-all"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer"
             >
               <Download className="w-4 h-4" />
               <span>Baixar em Excel (.xlsx)</span>
@@ -208,7 +219,7 @@ function RelatorioContent() {
 
             <button
               onClick={handlePrint}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-premier-primary hover:bg-premier-primary-dark text-white text-xs font-bold shadow-md hover:shadow-lg transition-all"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-premier-primary hover:bg-premier-primary-dark text-white text-xs font-semibold shadow-xs hover:shadow transition-all cursor-pointer"
             >
               <Printer className="w-4 h-4" />
               <span>Salvar em PDF / Imprimir</span>
@@ -217,71 +228,71 @@ function RelatorioContent() {
         </div>
       </header>
 
-      {/* DOCUMENTO FORMAL A4 (IMPRESSÃO DE ALTA QUALIDADE) */}
-      <main className="max-w-4xl mx-auto my-6 p-8 sm:p-12 bg-white rounded-2xl shadow-md border border-slate-200 print:my-0 print:p-0 print:border-none print:shadow-none print:max-w-none">
+      {/* DOCUMENTO FORMAL A4 (PÁGINA INSTITUCIONAL) */}
+      <main className="max-w-4xl mx-auto my-6 p-8 sm:p-12 bg-white rounded-2xl shadow-sm border border-slate-200/90 print:my-0 print:p-0 print:border-none print:shadow-none print:max-w-none">
         
         {/* CABEÇALHO INSTITUCIONAL */}
-        <div className="border-b-2 border-[#180B38] pb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="bg-[#180B38] p-3 rounded-xl">
+        <div className="border-b-2 border-[#180B38] pb-6 flex flex-col sm:flex-row items-center justify-between gap-5">
+          <div className="bg-[#180B38] p-3 rounded-xl shadow-xs">
             <PremierLogo className="h-10 w-auto" />
           </div>
-          <div className="text-center sm:text-right">
-            <h1 className="text-base sm:text-lg font-extrabold text-[#180B38] tracking-tight uppercase">
+          <div className="text-center sm:text-right space-y-0.5">
+            <h1 className="text-base sm:text-lg font-black text-[#180B38] tracking-tight uppercase font-heading">
               Premier Logistics Gestão Empresarial
             </h1>
-            <p className="text-xs text-slate-500 font-medium">
+            <p className="text-xs text-slate-600 font-semibold">
               Diretoria de Recursos Humanos, D&I e Governança Corporativa
             </p>
-            <p className="text-[11px] text-slate-400 mt-0.5">
-              Documento emitido eletronicamente em: <strong>{emittedAt}</strong>
+            <p className="text-[11px] text-slate-400">
+              Documento emitido eletronicamente em <strong>{emittedAt}</strong>
             </p>
           </div>
         </div>
 
         {/* TÍTULO DO RELATÓRIO */}
-        <div className="my-6 text-center space-y-1">
-          <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-[11px] font-bold uppercase tracking-wider mb-1">
+        <div className="my-6 text-center space-y-1.5">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-[11px] font-bold uppercase tracking-wider mb-1 border border-slate-200">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Documento Institucional de Conformidade</span>
+            <span>Documento Oficial de Conformidade Legal & D&I</span>
           </div>
-          <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+          <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight font-heading">
             Relatório Institucional de Práticas de Inclusão, Diversidade & Governança
           </h2>
           <p className="text-xs text-slate-500 max-w-2xl mx-auto leading-relaxed">
-            Demonstrativo oficial de conformidade normativa, ateste de voluntariedade e quadro estatístico consolidado da força de trabalho.
+            Demonstrativo de conformidade normativa, ateste de voluntariedade e consolidação estatística da força de trabalho para fins de auditoria e prestação de contas.
           </p>
         </div>
 
-        {/* METADADOS */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs mb-8">
+        {/* METADADOS PRINCIPAIS */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50/90 p-4 rounded-xl border border-slate-200 text-xs mb-8">
           <div>
-            <span className="block text-slate-400 text-[10px] uppercase font-bold">Unidade / Filial</span>
-            <span className="font-bold text-slate-800">{unidadeTexto}</span>
+            <span className="block text-slate-400 text-[10px] uppercase font-bold tracking-wider">Unidade / Filial</span>
+            <span className="font-bold text-slate-900">{unidadeTexto}</span>
           </div>
           <div>
-            <span className="block text-slate-400 text-[10px] uppercase font-bold">Competência</span>
-            <span className="font-bold text-slate-800">{competenciaTexto}</span>
+            <span className="block text-slate-400 text-[10px] uppercase font-bold tracking-wider">Competência</span>
+            <span className="font-bold text-slate-900">{competenciaTexto}</span>
           </div>
           <div>
-            <span className="block text-slate-400 text-[10px] uppercase font-bold">Total Computado</span>
-            <span className="font-bold text-slate-800">{total} colaboradores</span>
+            <span className="block text-slate-400 text-[10px] uppercase font-bold tracking-wider">Colaboradores</span>
+            <span className="font-bold text-slate-900">{total} respondentes</span>
           </div>
           <div>
-            <span className="block text-slate-400 text-[10px] uppercase font-bold">Status de Integridade</span>
+            <span className="block text-slate-400 text-[10px] uppercase font-bold tracking-wider">Integridade LGPD</span>
             <span className="inline-flex items-center gap-1 font-bold text-emerald-700">
-              <CheckCircle2 className="w-3 h-3" />
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
               100% Auditado
             </span>
           </div>
         </div>
 
         {/* SEÇÃO 1: DECLARAÇÃO FORMAL DE VOLUNTARIEDADE E NÃO-DISCRIMINAÇÃO */}
-        <section className="mb-8 space-y-3">
-          <h3 className="text-sm font-bold text-[#180B38] uppercase tracking-wider border-b border-slate-200 pb-1 flex items-center gap-2">
-            <span>1. Declaração Formal de Voluntariedade e Não-Discriminação</span>
+        <section className="mb-8 space-y-3 break-inside-avoid">
+          <h3 className="text-xs font-bold text-[#180B38] uppercase tracking-wider border-b border-slate-200 pb-1 font-heading">
+            1. Declaração Formal de Voluntariedade e Não-Discriminação
           </h3>
 
-          <div className="text-[12px] text-slate-700 space-y-2.5 leading-relaxed text-justify bg-slate-50/50 p-4 rounded-xl border border-slate-100">
+          <div className="text-[12px] text-slate-700 space-y-2.5 leading-relaxed text-justify bg-slate-50/50 p-4 rounded-xl border border-slate-200/80">
             <p>
               A <strong>Premier Logistics Gestão Empresarial Ltda.</strong> atesta, para os devidos fins de direito e comprovação institucional perante entidades de fiscalização, auditorias e órgãos reguladores, que:
             </p>
@@ -301,15 +312,15 @@ function RelatorioContent() {
         </section>
 
         {/* SEÇÃO 2: QUADRO CONSOLIDADO DE INDICADORES */}
-        <section className="mb-8 space-y-4">
-          <h3 className="text-sm font-bold text-[#180B38] uppercase tracking-wider border-b border-slate-200 pb-1">
+        <section className="mb-8 space-y-5 break-inside-avoid">
+          <h3 className="text-xs font-bold text-[#180B38] uppercase tracking-wider border-b border-slate-200 pb-1 font-heading">
             2. Quadro Oficial de Indicadores de Diversidade & Inclusão
           </h3>
 
           {/* TABELA DE GÊNERO */}
           <div className="space-y-1.5">
             <h4 className="text-xs font-bold text-slate-800">2.1. Distribuição por Identidade de Gênero</h4>
-            <table className="w-full text-left border-collapse text-xs border border-slate-200">
+            <table className="w-full text-left border-collapse text-xs border border-slate-200 rounded-lg overflow-hidden">
               <thead>
                 <tr className="bg-[#180B38] text-white">
                   <th className="p-2 font-bold">Identidade / Categoria</th>
@@ -360,11 +371,11 @@ function RelatorioContent() {
           </div>
 
           {/* TABELA DE RAÇA/COR (IBGE) E PCD */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
             {/* Raça e Cor */}
             <div className="space-y-1.5">
-              <h4 className="text-xs font-bold text-slate-800">2.2. Raça / Cor (Critérios IBGE)</h4>
-              <table className="w-full text-left border-collapse text-xs border border-slate-200">
+              <h4 className="text-xs font-bold text-slate-800">2.2. Raça / Cor (Critérios Oficiais IBGE)</h4>
+              <table className="w-full text-left border-collapse text-xs border border-slate-200 rounded-lg overflow-hidden">
                 <thead>
                   <tr className="bg-slate-800 text-white">
                     <th className="p-2 font-bold">Classificação</th>
@@ -407,10 +418,10 @@ function RelatorioContent() {
               </table>
             </div>
 
-            {/* PcD e Inclusão */}
+            {/* PcD e Inclusão Afirmativa */}
             <div className="space-y-1.5">
               <h4 className="text-xs font-bold text-slate-800">2.3. Acessibilidade & PcD (Lei 13.146/2015)</h4>
-              <table className="w-full text-left border-collapse text-xs border border-slate-200">
+              <table className="w-full text-left border-collapse text-xs border border-slate-200 rounded-lg overflow-hidden">
                 <thead>
                   <tr className="bg-slate-800 text-white">
                     <th className="p-2 font-bold">Autodeclaração</th>
@@ -434,19 +445,19 @@ function RelatorioContent() {
                     <td className="p-2 text-center font-bold">{pcd.nao_informado}</td>
                     <td className="p-2 text-center">{calcPct(pcd.nao_informado)}%</td>
                   </tr>
-                  <tr className="bg-slate-100 font-semibold">
+                  <tr className="bg-slate-100/90 font-semibold text-[11px]">
                     <td className="p-2" colSpan={3}>
-                      Neurodivergência (Sim): {neurodivergente.sim} ({calcPct(neurodivergente.sim)}%)
+                      Neurodivergência declarada: {neurodivergente.sim} ({calcPct(neurodivergente.sim)}%)
                     </td>
                   </tr>
-                  <tr className="bg-slate-100 font-semibold">
+                  <tr className="bg-slate-100/90 font-semibold text-[11px]">
                     <td className="p-2" colSpan={3}>
-                      Longevidade 60+ anos: {faixaEtaria["60_mais"]} ({calcPct(faixaEtaria["60_mais"])}%)
+                      Longevidade (60+ anos): {faixaEtaria["60_mais"]} ({calcPct(faixaEtaria["60_mais"])}%)
                     </td>
                   </tr>
-                  <tr className="bg-slate-100 font-semibold">
+                  <tr className="bg-slate-100/90 font-semibold text-[11px]">
                     <td className="p-2" colSpan={3}>
-                      LGBTQIAPN+ (Sim): {lgbtqiapn.sim} ({calcPct(lgbtqiapn.sim)}%)
+                      LGBTQIAPN+ declarados: {lgbtqiapn.sim} ({calcPct(lgbtqiapn.sim)}%)
                     </td>
                   </tr>
                 </tbody>
@@ -456,8 +467,8 @@ function RelatorioContent() {
         </section>
 
         {/* SEÇÃO 3: QUADRO NORMATIVO APLICÁVEL */}
-        <section className="mb-10 text-[11px] text-slate-500 space-y-1 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-          <p className="font-bold text-slate-700">3. Quadro Normativo e Fundamentos Jurídicos:</p>
+        <section className="mb-8 text-[11px] text-slate-600 space-y-1.5 bg-slate-50 p-4 rounded-xl border border-slate-200 break-inside-avoid">
+          <p className="font-bold text-slate-800">3. Quadro Normativo e Fundamentos Jurídicos:</p>
           <p>• <strong>Constituição Federal de 1988:</strong> Art. 3º, IV (promoção do bem de todos sem preconceito) e Art. 5º (igualdade formal e material).</p>
           <p>• <strong>Convenção nº 111 da OIT:</strong> Proibição de discriminação e fomento à igualdade de oportunidades no emprego.</p>
           <p>• <strong>Lei nº 13.709/2018 (LGPD):</strong> Art. 7º, I e Art. 11, I (tratamento legítimo com consentimento facultativo).</p>
@@ -466,19 +477,32 @@ function RelatorioContent() {
           <p>• <strong>Lei nº 14.611/2023:</strong> Igualdade salarial e critérios remuneratórios entre mulheres e homens.</p>
         </section>
 
-        {/* ASSINATURA / ENCERRAMENTO */}
-        <div className="pt-6 border-t-2 border-slate-300 grid grid-cols-1 sm:grid-cols-2 gap-8 text-center text-xs">
-          <div className="space-y-1">
-            <div className="w-48 h-0.5 bg-slate-400 mx-auto mb-2" />
-            <p className="font-bold text-slate-800">Diretoria de Recursos Humanos & D&I</p>
-            <p className="text-[11px] text-slate-500">Premier Logistics Gestão Empresarial</p>
+        {/* ENCERRAMENTO INSTITUCIONAL & AUTENTICAÇÃO DIGITAL (SEM LINHAS DE ASSINATURA FÍSICA) */}
+        <section className="pt-5 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 break-inside-avoid">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-700 shrink-0">
+              <FileCheck2 className="w-4 h-4 text-premier-primary" />
+            </div>
+            <div>
+              <p className="font-bold text-slate-800">
+                Documento Eletrônico Oficial • Premier Logistics
+              </p>
+              <p className="text-[11px] text-slate-400">
+                Emitido via Sistema Integrado de Gestão D&I — Dispensa assinatura física manuscrita.
+              </p>
+            </div>
           </div>
-          <div className="space-y-1">
-            <div className="w-48 h-0.5 bg-slate-400 mx-auto mb-2" />
-            <p className="font-bold text-slate-800">Governança & Conformidade Legal</p>
-            <p className="text-[11px] text-slate-500">Registro de Integridade e Auditoria</p>
+
+          <div className="text-right text-[11px] space-y-0.5">
+            <div className="flex items-center justify-end gap-1.5 text-emerald-700 font-semibold">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Autenticação Digital Ativa</span>
+            </div>
+            <p className="text-slate-400">
+              Conformidade LGPD • ID: {competencia.replace("-", "")}-{unidade.substring(0, 3).toUpperCase()}-COMPLIANCE
+            </p>
           </div>
-        </div>
+        </section>
 
       </main>
     </div>
@@ -490,7 +514,9 @@ export default function RelatorioInstitucionalPage() {
     <React.Suspense
       fallback={
         <div className="min-h-screen bg-slate-50 flex items-center justify-center p-8">
-          <div className="text-center text-slate-500 font-sans">Carregando relatório institucional...</div>
+          <div className="text-center text-slate-500 font-sans text-xs font-semibold">
+            Carregando relatório institucional...
+          </div>
         </div>
       }
     >
