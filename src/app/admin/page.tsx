@@ -457,14 +457,6 @@ export default function AdminPage() {
   }
 
   const totalResp = summary?.total || 0;
-  
-  // Total de declarações afirmativas
-  const totalAfirmativo =
-    (summary?.pcd.sim || 0) +
-    (summary?.neurodivergente.sim || 0) +
-    (summary?.lgbtqiapn.sim || 0) +
-    (summary?.faixaEtaria["60_mais"] || 0);
-
   const hasActiveFilters = selectedUnidade !== "todas" || selectedCompetencia !== "todas";
 
   return (
@@ -472,64 +464,37 @@ export default function AdminPage() {
       <Header showAdminLink={false} maxWidth="max-w-7xl" />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
-        {/* BANNER HERO EXECUTIVO */}
-        <div className="bg-gradient-to-r from-[#14082E] via-[#1F0E48] to-[#2B145E] rounded-3xl p-6 sm:p-7 text-white shadow-xl border border-purple-900/40 relative overflow-hidden">
-          {/* Luz de fundo decorativa */}
-          <div className="absolute -right-16 -top-16 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute right-32 -bottom-20 w-56 h-56 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
-
-          <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2.5 flex-wrap">
-                <span className="px-2.5 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-white/10 text-white/90 border border-white/15 backdrop-blur-sm">
-                  Painel de Gestão Corporativa
-                </span>
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/25">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>Sessão Ativa</span>
-                </div>
-                <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-purple-400/15 text-purple-200 border border-purple-400/25">
-                  Perfil: {userRole === "rh_administrador" ? "Administrador Master" : "RH Agregado"}
-                </span>
-              </div>
-
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-black text-white font-heading tracking-tight">
-                  Indicadores de Diversidade & Inclusão
-                </h1>
-                <p className="text-xs sm:text-sm text-slate-300 max-w-2xl mt-0.5">
-                  Consolidação estatística, índices demográficos em tempo real e emissão de relatórios oficiais da Premier Logistics.
-                </p>
-              </div>
+        {/* TOPO MINIMALISTA & CONTROLES */}
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 space-y-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            {/* Título e Contador */}
+            <div className="flex items-center gap-3">
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight font-heading">
+                Painel de Gestão
+              </h1>
+              <span className="text-xs font-semibold text-slate-600 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
+                {totalResp} {totalResp === 1 ? "resposta" : "respostas"}
+              </span>
+              <span className="hidden md:inline-block text-xs text-slate-400 font-medium">
+                • {userRole === "rh_administrador" ? "RH Administrador Master" : "RH Agregado"}
+              </span>
             </div>
 
-            {/* BARRA DE AÇÕES DO HEADER */}
-            <div className="flex items-center gap-2.5 flex-wrap w-full lg:w-auto justify-start lg:justify-end pt-2 lg:pt-0">
-              <button
-                type="button"
-                onClick={fetchSummary}
-                disabled={isLoadingSummary}
-                title="Atualizar dados em tempo real"
-                className="px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-white text-xs font-bold transition-all flex items-center gap-2 backdrop-blur-sm cursor-pointer disabled:opacity-50"
-              >
-                <RefreshCw className={`w-4 h-4 ${isLoadingSummary ? "animate-spin" : ""}`} />
-                <span className="hidden sm:inline">Atualizar</span>
-              </button>
-
-              {/* SELETOR E GERADOR DE RELATÓRIOS UNIFICADO */}
-              <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+            {/* Ações: Exportação, Atualização e Saída */}
+            <div className="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
+              <div className="flex items-center gap-2">
                 <select
                   id="report-type-select"
                   value={selectedReportType}
                   onChange={(e) => setSelectedReportType(e.target.value)}
-                  className="bg-white text-slate-800 border border-slate-300 rounded-xl px-3 py-2.5 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#C4A87F] shadow-sm cursor-pointer"
+                  className="bg-slate-50 hover:bg-slate-100/80 text-slate-700 border border-slate-300 rounded-lg px-3 py-1.5 text-xs font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-premier-primary/20 transition-all cursor-pointer"
                 >
-                  <option value="institucional_pdf">📄 Relatório Institucional (.pdf)</option>
-                  <option value="institucional_xlsx">📊 Relatório Institucional (.xlsx)</option>
-                  <option value="premier_xlsx">✨ Relatório Premier (.xlsx)</option>
-                  <option value="extrato_xlsx">📑 Extrato de Diversidade (.xlsx)</option>
+                  <option value="institucional_pdf">Relatório Institucional (.pdf)</option>
+                  <option value="institucional_xlsx">Relatório Institucional (.xlsx)</option>
+                  <option value="premier_xlsx">Relatório Premier (.xlsx)</option>
+                  <option value="extrato_xlsx">Extrato de Diversidade (.xlsx)</option>
                   {userRole === "rh_administrador" && (
-                    <option value="nominal_xlsx">🔒 Base Nominal Restrita (.xlsx)</option>
+                    <option value="nominal_xlsx">Base Nominal Restrita (.xlsx)</option>
                   )}
                 </select>
 
@@ -538,200 +503,96 @@ export default function AdminPage() {
                   id="generate-report-button"
                   onClick={handleGenerateSelectedReport}
                   disabled={isGeneratingReport}
-                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#E5D2B8] to-[#C4A87F] hover:from-[#EDDFC9] hover:to-[#BFA276] text-[#180B38] text-xs sm:text-sm font-extrabold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:translate-y-0 shrink-0 cursor-pointer"
+                  className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-premier-primary hover:bg-premier-primary-dark text-white text-xs font-semibold shadow-xs hover:shadow transition-all disabled:opacity-50 cursor-pointer"
                 >
                   {isGeneratingReport ? (
                     <>
-                      <div className="w-4 h-4 border-2 border-[#180B38] border-t-transparent rounded-full animate-spin" />
+                      <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       <span>Gerando...</span>
                     </>
                   ) : (
                     <>
-                      <Download className="w-4 h-4 stroke-[2.5]" />
-                      <span>Gerar Relatório</span>
+                      <Download className="w-3.5 h-3.5" />
+                      <span>Exportar</span>
                     </>
                   )}
                 </button>
               </div>
 
-              {/* BOTÃO SAIR */}
+              <div className="h-4 w-px bg-slate-200 mx-1 hidden sm:block" />
+
+              <button
+                type="button"
+                onClick={fetchSummary}
+                disabled={isLoadingSummary}
+                title="Atualizar dados"
+                className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 border border-transparent hover:border-slate-200 transition-all cursor-pointer"
+              >
+                <RefreshCw className={`w-4 h-4 ${isLoadingSummary ? "animate-spin text-premier-primary" : ""}`} />
+              </button>
+
               <button
                 type="button"
                 onClick={handleLogout}
-                title="Encerrar sessão com segurança"
-                className="p-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 hover:text-rose-100 text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer"
+                title="Sair"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-100 transition-all cursor-pointer"
               >
                 <LogOut className="w-4 h-4" />
-                <span className="hidden sm:inline">Sair</span>
               </button>
             </div>
           </div>
-        </div>
 
-        {/* 4 CARDS DE MÉTRICAS EXECUTIVAS (KPIs) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* KPI 1: Total Respondentes */}
-          <div className="bg-white rounded-2xl p-5 shadow-card border border-slate-200/90 flex items-center justify-between gap-3 hover:shadow-card-hover transition-all">
-            <div className="space-y-1">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
-                Total de Respondentes
-              </span>
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-black text-slate-900 tracking-tight font-heading">
-                  {totalResp}
-                </span>
-                <span className="text-xs font-semibold text-slate-500">
-                  {selectedUnidade === "todas" ? "geral" : "no filtro"}
-                </span>
+          {/* Filtros Compactos em Linha */}
+          <div className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
+              {/* Unidade */}
+              <div className="flex items-center gap-2 flex-1 sm:max-w-xs">
+                <Building2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <select
+                  value={selectedUnidade}
+                  onChange={(e) => setSelectedUnidade(e.target.value)}
+                  className="w-full bg-slate-50 hover:bg-slate-100/60 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 font-medium focus:bg-white focus:outline-none focus:ring-1 focus:ring-premier-primary/30 transition-all cursor-pointer"
+                >
+                  <option value="todas">Todas as Unidades</option>
+                  {UNIDADES.map((u) => (
+                    <option key={u} value={u}>
+                      {u}
+                    </option>
+                  ))}
+                </select>
               </div>
-              <p className="text-[11px] text-slate-400">
-                Colaboradores participantes
-              </p>
-            </div>
-            <div className="w-12 h-12 rounded-2xl bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-700 shadow-sm shrink-0">
-              <Users className="w-6 h-6" />
-            </div>
-          </div>
 
-          {/* KPI 2: Unidade Ativa */}
-          <div className="bg-white rounded-2xl p-5 shadow-card border border-slate-200/90 flex items-center justify-between gap-3 hover:shadow-card-hover transition-all">
-            <div className="space-y-1 overflow-hidden">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
-                Recorte de Unidade
-              </span>
-              <div className="text-base sm:text-lg font-black text-slate-900 tracking-tight truncate">
-                {selectedUnidade === "todas" ? "Todas as Filiais" : selectedUnidade}
+              {/* Competência */}
+              <div className="flex items-center gap-2 flex-1 sm:max-w-xs">
+                <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <select
+                  value={selectedCompetencia}
+                  onChange={(e) => setSelectedCompetencia(e.target.value)}
+                  className="w-full bg-slate-50 hover:bg-slate-100/60 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 font-medium focus:bg-white focus:outline-none focus:ring-1 focus:ring-premier-primary/30 transition-all cursor-pointer"
+                >
+                  <option value="todas">Todas as Competências (Geral)</option>
+                  {availableCompetencias.map((comp) => (
+                    <option key={comp} value={comp}>
+                      {formatCompetencia(comp)} ({comp})
+                    </option>
+                  ))}
+                </select>
               </div>
-              <p className="text-[11px] text-slate-400">
-                {availableUnidades.length > 0 ? `${availableUnidades.length} filiais registradas` : "Consolidado geral"}
-              </p>
-            </div>
-            <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-700 shadow-sm shrink-0">
-              <Building2 className="w-6 h-6" />
-            </div>
-          </div>
 
-          {/* KPI 3: Declarações Afirmativas */}
-          <div className="bg-white rounded-2xl p-5 shadow-card border border-slate-200/90 flex items-center justify-between gap-3 hover:shadow-card-hover transition-all">
-            <div className="space-y-1">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
-                Grupos Afirmativos
-              </span>
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-black text-slate-900 tracking-tight font-heading">
-                  {totalAfirmativo}
-                </span>
-                <span className="text-xs font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                  inclusão
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-400">
-                PcD, Neuro, LGBTQIA+, 60+
-              </p>
-            </div>
-            <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-700 shadow-sm shrink-0">
-              <Sparkles className="w-6 h-6" />
-            </div>
-          </div>
-
-          {/* KPI 4: Período / Competência */}
-          <div className="bg-white rounded-2xl p-5 shadow-card border border-slate-200/90 flex items-center justify-between gap-3 hover:shadow-card-hover transition-all">
-            <div className="space-y-1 overflow-hidden">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
-                Competência Vigente
-              </span>
-              <div className="text-base sm:text-lg font-black text-slate-900 tracking-tight truncate">
-                {selectedCompetencia === "todas" ? "Histórico Geral" : formatCompetencia(selectedCompetencia)}
-              </div>
-              <p className="text-[11px] text-slate-400">
-                {selectedCompetencia === "todas" ? "Todos os períodos" : selectedCompetencia}
-              </p>
-            </div>
-            <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-700 shadow-sm shrink-0">
-              <Calendar className="w-6 h-6" />
-            </div>
-          </div>
-        </div>
-
-        {/* BARRA DE FILTROS REFINADA */}
-        <div className="bg-white rounded-2xl p-5 shadow-card border border-slate-200/90 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-700">
-                <Filter className="w-4 h-4 text-premier-primary" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-slate-900">
-                  Filtros de Segmentação e Análise
-                </h3>
-                <p className="text-xs text-slate-400">
-                  Selecione a unidade e a competência para recalcular os gráficos e tabelas
-                </p>
-              </div>
+              {hasActiveFilters && (
+                <button
+                  type="button"
+                  onClick={handleResetFilters}
+                  className="text-xs text-slate-500 hover:text-premier-primary font-medium underline self-center sm:self-auto cursor-pointer"
+                >
+                  Limpar filtros
+                </button>
+              )}
             </div>
 
-            {hasActiveFilters && (
-              <button
-                type="button"
-                onClick={handleResetFilters}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-premier-primary hover:text-[#281358] bg-purple-50 hover:bg-purple-100/80 border border-purple-200 rounded-lg transition-all self-start sm:self-auto cursor-pointer"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>Restaurar Consolidado Geral</span>
-              </button>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-center">
-            {/* Filtro de Unidade */}
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
-                <Building2 className="w-4 h-4 text-premier-secondary" />
-                <span>Unidade Operacional / Filial</span>
-              </label>
-              <select
-                value={selectedUnidade}
-                onChange={(e) => setSelectedUnidade(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#180B38]/20 focus:border-[#180B38] transition-all cursor-pointer"
-              >
-                <option value="todas">Todas as Unidades (Consolidado Nacional)</option>
-                {UNIDADES.map((u) => (
-                  <option key={u} value={u}>
-                    {u}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Filtro de Competência */}
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
-                <Calendar className="w-4 h-4 text-premier-secondary" />
-                <span>Competência Mensal</span>
-              </label>
-              <select
-                value={selectedCompetencia}
-                onChange={(e) => setSelectedCompetencia(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#180B38]/20 focus:border-[#180B38] transition-all cursor-pointer"
-              >
-                <option value="todas">Todas as Competências (Histórico Geral)</option>
-                {availableCompetencias.map((comp) => (
-                  <option key={comp} value={comp}>
-                    {formatCompetencia(comp)} ({comp})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Status do Filtro */}
-            <div className="flex sm:col-span-2 lg:col-span-1 items-center justify-start lg:justify-end pt-1">
-              <div className="bg-slate-50 border border-slate-200 px-4 py-2.5 rounded-xl flex items-center gap-3 w-full lg:w-auto justify-between lg:justify-end">
-                <span className="text-xs text-slate-500 font-medium">Respondentes filtrados:</span>
-                <span className="text-lg font-black text-premier-primary">
-                  {totalResp}
-                </span>
-              </div>
-            </div>
+            <span className="text-[11px] text-slate-400 text-right self-end sm:self-auto">
+              Atualização automática a cada resposta
+            </span>
           </div>
         </div>
 
@@ -762,71 +623,50 @@ export default function AdminPage() {
         {/* GRÁFICOS DE DIVERSIDADE */}
         <DiversityCharts summary={summary} />
 
-        {/* CARD CORPORATIVO: LINK DE ENVIO & DIVULGAÇÃO INTERNA */}
-        <div className="bg-gradient-to-br from-white to-slate-50 rounded-3xl p-6 sm:p-7 shadow-card border border-slate-200/90 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-700 shadow-sm shrink-0">
-                <Copy className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-slate-900 font-heading">
-                  Link Único de Coleta Corporativa
-                </h3>
-                <p className="text-xs text-slate-500">
-                  Compartilhe este link com todos os colaboradores. Cada participante escolhe sua respectiva filial na 1ª etapa do formulário.
-                </p>
-              </div>
-            </div>
-
-            <a
-              href="/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-premier-primary hover:text-[#281358] bg-white hover:bg-slate-100 border border-slate-300 rounded-xl transition-all self-start sm:self-auto shadow-xs"
-            >
-              <span>Abrir Formulário</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
+        {/* LINK DE DIVULGAÇÃO CORPORATIVO (MINIMALISTA) */}
+        <div className="bg-white rounded-xl p-3.5 border border-slate-200/80 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2 text-slate-600 truncate">
+            <Copy className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+            <span className="font-semibold text-slate-700">Link do Formulário:</span>
+            <span className="font-mono text-slate-500 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded text-[11px] truncate select-all">
+              {typeof window !== "undefined" ? window.location.origin : ""}
+            </span>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center gap-2.5">
-            <input
-              type="text"
-              readOnly
-              value={typeof window !== "undefined" ? window.location.origin : ""}
-              className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-xs sm:text-sm font-mono text-slate-800 select-all shadow-inner focus:outline-none"
-            />
+          <div className="flex items-center gap-2 shrink-0 justify-end">
             <button
               type="button"
               onClick={() => {
                 if (typeof window !== "undefined") {
                   navigator.clipboard.writeText(window.location.origin);
                   setCopiedLink(true);
-                  setTimeout(() => setCopiedLink(false), 2500);
+                  setTimeout(() => setCopiedLink(false), 2000);
                 }
               }}
-              className="w-full sm:w-auto px-5 py-3 bg-[#180B38] hover:bg-[#281458] text-white text-xs font-bold rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200/80 text-slate-700 font-semibold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer"
             >
               {copiedLink ? (
                 <>
-                  <Check className="w-4 h-4 text-emerald-400 stroke-[3]" />
-                  <span>Copiado com Sucesso!</span>
+                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Copiado</span>
                 </>
               ) : (
                 <>
-                  <Copy className="w-4 h-4" />
-                  <span>Copiar Link de Divulgação</span>
+                  <Copy className="w-3.5 h-3.5" />
+                  <span>Copiar Link</span>
                 </>
               )}
             </button>
-          </div>
 
-          <div className="flex items-center gap-2 pt-1 text-xs text-slate-500">
-            <span className="w-1.5 h-1.5 rounded-full bg-premier-secondary shrink-0" />
-            <span>
-              <strong>Dica RH:</strong> O formulário é totalmente responsivo (desktop e mobile). Envie via E-mail Corporativo, Microsoft Teams ou WhatsApp institucional.
-            </span>
+            <a
+              href="/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-all"
+              title="Abrir formulário em nova aba"
+            >
+              <ExternalLink className="w-4 h-4" />
+            </a>
           </div>
         </div>
       </main>
