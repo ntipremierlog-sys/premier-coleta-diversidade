@@ -7,12 +7,13 @@ import { PremierLogo } from "./PremierLogo";
 
 interface HeaderProps {
   showAdminLink?: boolean;
+  maxWidth?: string;
 }
 
-export const Header: React.FC<HeaderProps> = ({ showAdminLink = true }) => {
+export const Header: React.FC<HeaderProps> = ({ showAdminLink = true, maxWidth = "max-w-4xl" }) => {
   return (
     <header className="w-full bg-[#24134a] text-white border-b border-[#351e68]">
-      <div className="max-w-4xl mx-auto px-4 py-3 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className={`${maxWidth} mx-auto px-4 py-3 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3`}>
         {/* Brand Logo & Título Oficial */}
         <div className="flex items-center gap-3 sm:gap-4">
           <Link href="/" className="flex items-center group focus:outline-none shrink-0 py-1">
