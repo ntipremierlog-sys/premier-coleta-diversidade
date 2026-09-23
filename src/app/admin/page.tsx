@@ -351,36 +351,24 @@ export default function AdminPage() {
     );
   }
 
-  // TELA DE LOGIN ELEGANTE
+  // TELA DE LOGIN UNIFORME E MINIMALISTA
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen flex flex-col justify-between bg-gradient-to-br from-[#0D0521] via-[#180B38] to-[#251052] relative overflow-hidden">
-        {/* Elementos decorativos de fundo */}
-        <div className="absolute -top-32 -left-32 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="min-h-screen flex flex-col justify-between bg-premier-bg">
+        <Header showAdminLink={false} />
 
-        <Header showAdminLink={false} maxWidth="max-w-4xl" />
-
-        <main className="flex-1 flex items-center justify-center px-4 py-12 relative z-10">
-          <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl border-t-4 border-[#C4A87F] border-x border-b border-slate-200/90 p-6 sm:p-8 space-y-6">
-            <div className="text-center space-y-3">
-              <div className="bg-[#180B38] p-4 rounded-2xl flex items-center justify-center shadow-md mx-auto inline-flex">
-                <PremierLogo className="h-12 w-auto" />
-              </div>
-              <div className="space-y-1">
-                <h2 className="text-xl sm:text-2xl font-black text-slate-900 font-heading">
-                  Painel de Gestão & D&I
-                </h2>
-                <p className="text-xs text-slate-500">
-                  Acesso restrito para monitoramento corporativo e relatórios de conformidade.
-                </p>
-              </div>
+        <main className="flex-1 flex items-center justify-center px-4 py-12">
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-card border border-slate-200/90 p-6 sm:p-8 space-y-6">
+            <div className="text-center space-y-1">
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 font-heading">
+                Painel de Gestão
+              </h1>
             </div>
 
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
-                  <Lock className="w-3.5 h-3.5 text-premier-primary" />
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5">
+                  <Lock className="w-3.5 h-3.5 text-slate-400" />
                   <span>Senha de Acesso</span>
                 </label>
                 <div className="relative">
@@ -389,14 +377,14 @@ export default function AdminPage() {
                     id="admin-password-input"
                     value={passwordInput}
                     onChange={(e) => setPasswordInput(e.target.value)}
-                    placeholder="Digite sua senha de acesso..."
-                    className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-4 pr-11 py-3 text-sm text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#180B38]/30 focus:border-[#180B38] transition-all"
+                    placeholder="Digite sua senha..."
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-4 pr-11 py-2.5 text-sm text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-premier-primary/20 focus:border-premier-primary transition-all"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
                     title={showPassword ? "Ocultar senha" : "Ver senha"}
                   >
                     {showPassword ? (
@@ -409,23 +397,23 @@ export default function AdminPage() {
               </div>
 
               {/* Informação sobre os níveis de acesso */}
-              <div className="bg-slate-50 rounded-xl p-3 border border-slate-200/90 text-xs text-slate-600 space-y-1.5">
+              <div className="bg-slate-50 rounded-xl p-3 border border-slate-200 text-xs text-slate-600 space-y-1.5">
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-blue-600" />
                   <span>
-                    <strong>RH Agregado:</strong> Indicadores consolidados e exportações de conformidade.
+                    <strong>RH Agregado:</strong> Indicadores consolidados e relatórios.
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-purple-600" />
                   <span>
-                    <strong>RH Administrador:</strong> Acesso analítico total e base nominal confidencial.
+                    <strong>RH Administrador:</strong> Gestão completa e base nominal.
                   </span>
                 </div>
               </div>
 
               {authError && (
-                <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs font-semibold flex items-center gap-2">
+                <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs font-semibold flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600" />
                   <span>{authError}</span>
                 </div>
@@ -435,17 +423,17 @@ export default function AdminPage() {
                 type="submit"
                 id="admin-login-button"
                 disabled={isLoggingIn}
-                className="w-full bg-[#180B38] hover:bg-[#281358] text-white font-bold py-3.5 px-4 rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:translate-y-0"
+                className="w-full bg-premier-primary hover:bg-premier-primary-dark text-white font-semibold py-3 px-4 rounded-xl shadow-xs hover:shadow transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
               >
                 {isLoggingIn ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Autenticando sessão...</span>
+                    <span>Entrando...</span>
                   </>
                 ) : (
                   <>
                     <Lock className="w-4 h-4" />
-                    <span>Acessar Painel Executivo</span>
+                    <span>Entrar</span>
                   </>
                 )}
               </button>
